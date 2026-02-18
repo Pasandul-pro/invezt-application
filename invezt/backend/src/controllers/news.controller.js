@@ -14,6 +14,7 @@ class NewsController {
             const results = await newsRepository.fetchEverything({ q, sortBy, language, apiKey });
             res.json(results);
         } catch (error) {
+            console.error('Search Error:', error);
             res.status(500).json({ error: error.message });
         }
     }
@@ -24,9 +25,12 @@ class NewsController {
     async summarizeArticle(req, res) {
         try {
             const { content } = req.body;
+
+            // Validation for content length
             if (!content || content.length < 50) {
-                return res.status(400).json({ error: "Content too short for AI analysis." });
+                return res.status(400).json({ error: "Content too short for AI analysis. Please provide at least 50 characters." });
             }
+
             const summary = await summarizeNewsArticleFlow({ articleContent: content });
             res.json(summary);
         } catch (error) {
