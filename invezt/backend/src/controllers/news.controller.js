@@ -1,0 +1,39 @@
+import { summarizeNewsArticleFlow } from '../util/ai.flows.js';
+import { newsRepository } from '../util/news.repository.js';
+
+/**
+ * Controller for News-related routes.
+ */
+class NewsController {
+    /**
+     * Handles news search request.
+     */
+    async searchNews(req, res) {
+        try {
+            const { q, sortBy, language, apiKey } = req.query;
+            const results = await newsRepository.fetchEverything({ q, sortBy, language, apiKey });
+            res.json(results);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Handles article summarization request.
+     */
+    async summarizeArticle(req, res) {
+        try {
+            const { content } = req.body;
+            if (!content || content.length < 50) {
+                return res.status(400).json({ error: "Content too short for AI analysis." });
+            }
+            const summary = await summarizeNewsArticleFlow({ articleContent: content });
+            res.json(summary);
+        } catch (error) {
+            console.error('Summarization Error:', error);
+            res.status(500).json({ error: error.message });
+        }
+    }
+}
+
+export const newsController = new NewsController();
