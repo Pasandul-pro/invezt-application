@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // models/Portfolio.js
 const mongoose = require('mongoose');
 
@@ -82,6 +83,10 @@ const transactionSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+=======
+const mongoose = require('mongoose');
+
+>>>>>>> Stashed changes
 const portfolioSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -91,6 +96,7 @@ const portfolioSchema = new mongoose.Schema({
   },
   name: {
     type: String,
+<<<<<<< Updated upstream
     required: true,
     trim: true,
     default: 'My Portfolio'
@@ -106,6 +112,61 @@ const portfolioSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     min: 0
+=======
+    default: 'My Portfolio'
+  },
+  holdings: [{
+    stockId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stock'
+    },
+    symbol: {
+      type: String,
+      required: true
+    },
+    companyName: {
+      type: String,
+      required: true
+    },
+    shares: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    avgPrice: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    currentPrice: {
+      type: Number,
+      default: 0
+    },
+    totalValue: {
+      type: Number,
+      default: 0
+    },
+    gainLoss: {
+      type: Number,
+      default: 0
+    },
+    gainLossPercent: {
+      type: Number,
+      default: 0
+    },
+    addedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  totalValue: {
+    type: Number,
+    default: 0
+  },
+  totalCost: {
+    type: Number,
+    default: 0
+>>>>>>> Stashed changes
   },
   totalGainLoss: {
     type: Number,
@@ -115,6 +176,7 @@ const portfolioSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+<<<<<<< Updated upstream
   lastUpdated: {
     type: Date,
     default: Date.now
@@ -260,3 +322,37 @@ portfolioSchema.pre('save', function(next) {
 const Portfolio = mongoose.model('Portfolio', portfolioSchema);
 
 module.exports = Portfolio;
+=======
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
+
+// Method to calculate portfolio totals
+portfolioSchema.methods.calculateTotals = function() {
+  this.totalValue = 0;
+  this.totalCost = 0;
+  
+  this.holdings.forEach(holding => {
+    const currentValue = holding.shares * (holding.currentPrice || holding.avgPrice);
+    const cost = holding.shares * holding.avgPrice;
+    
+    holding.totalValue = currentValue;
+    holding.gainLoss = currentValue - cost;
+    holding.gainLossPercent = cost > 0 ? (holding.gainLoss / cost) * 100 : 0;
+    
+    this.totalValue += currentValue;
+    this.totalCost += cost;
+  });
+  
+  this.totalGainLoss = this.totalValue - this.totalCost;
+  this.totalGainLossPercent = this.totalCost > 0 ? (this.totalGainLoss / this.totalCost) * 100 : 0;
+  
+  return this;
+};
+
+module.exports = mongoose.model('Portfolio', portfolioSchema);
+>>>>>>> Stashed changes
