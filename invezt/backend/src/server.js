@@ -13,10 +13,11 @@ const authRoutes = require('./routes/authRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
 const userRoutes = require('./routes/userRoutes');
 
-// 👇 YOUR IMPORTS (News, Alerts, Notifications)
+// 👇 YOUR IMPORTS (News, Alerts, Notifications, Stocks)
 const newsRoutes = require('./routes/news.routes.js');
 const alertRoutes = require('./routes/alert.routes.js');
 const notificationSettingsRoutes = require('./routes/notificationSettings.routes.js');
+const stockRoutes = require('./routes/stock.routes.js'); // NEW for Sprint 1
 
 // Middleware - This allows the server to understand JSON sent from the frontend
 app.use(express.json());
@@ -32,23 +33,25 @@ app.use('/api/auth', authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/user', userRoutes);
 
-// 👇 YOUR ROUTES (News, Alerts, Notifications)
+// 👇 YOUR ROUTES (News, Alerts, Notifications, Stocks)
 app.use('/api/news', newsRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/notification-settings', notificationSettingsRoutes);
+app.use('/api/stocks', stockRoutes); // NEW for Sprint 1
 
 // Test endpoint to check if server is running
 app.get('/', (req, res) => {
   res.json({ 
     success: true, 
-    message: 'Invezt API is running',
+    message: 'Invezt API is running - Sprint 1',
     endpoints: {
       auth: '/api/auth',
       portfolio: '/api/portfolio',
       user: '/api/user',
-      news: '/api/news',                    // Your endpoint
-      alerts: '/api/alerts',                 // Your endpoint
-      settings: '/api/notification-settings' // Your endpoint
+      stocks: '/api/stocks',              // NEW endpoint
+      news: '/api/news',
+      alerts: '/api/alerts',
+      settings: '/api/notification-settings'
     }
   });
 });
@@ -69,7 +72,7 @@ app.get('/api/test/news', async (req, res) => {
         category: n.category,
         date: n.date
       })),
-      note: 'Your Sprint 0 is complete!'
+      note: 'Sprint 1 enhanced with pagination and search'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -86,7 +89,7 @@ app.get('/api/test/alerts', async (req, res) => {
       success: true, 
       message: '✅ Alert schema is working!',
       totalAlerts: alertsCount,
-      note: 'Your Sprint 0 is complete!'
+      note: 'Ready for Sprint 1'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -103,7 +106,30 @@ app.get('/api/test/settings', async (req, res) => {
       success: true, 
       message: '✅ NotificationSettings schema is working!',
       totalSettings: settingsCount,
-      note: 'Your Sprint 0 is complete!'
+      note: 'Ready for Sprint 1'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Test endpoint specifically for your Stock API (NEW)
+app.get('/api/test/stocks', async (req, res) => {
+  try {
+    const Stock = require('./models/Stock');
+    const stockCount = await Stock.countDocuments();
+    const recentStocks = await Stock.find().limit(5);
+    
+    res.json({ 
+      success: true, 
+      message: '✅ Stock schema is working!',
+      totalStocks: stockCount,
+      recentStocks: recentStocks.map(s => ({
+        symbol: s.symbol,
+        name: s.name,
+        sector: s.sector
+      })),
+      note: 'Sprint 1 - Stock Metadata API ready for frontend dropdown'
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -114,11 +140,14 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Your News API: http://localhost:${PORT}/api/news`);
-  console.log(`📝 Your Alerts API: http://localhost:${PORT}/api/alerts`);
-  console.log(`📝 Your Settings API: http://localhost:${PORT}/api/notification-settings`);
+  console.log(`📝 Your APIs:`);
+  console.log(`   News API: http://localhost:${PORT}/api/news`);
+  console.log(`   Alerts API: http://localhost:${PORT}/api/alerts`);
+  console.log(`   Settings API: http://localhost:${PORT}/api/notification-settings`);
+  console.log(`   Stocks API: http://localhost:${PORT}/api/stocks (NEW for Sprint 1)`);
   console.log(`🧪 Test your schemas:`);
   console.log(`   http://localhost:${PORT}/api/test/news`);
   console.log(`   http://localhost:${PORT}/api/test/alerts`);
   console.log(`   http://localhost:${PORT}/api/test/settings`);
+  console.log(`   http://localhost:${PORT}/api/test/stocks (NEW)`);
 });
