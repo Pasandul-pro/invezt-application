@@ -34,6 +34,15 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 
+const startServer = async () => {
+    try {
+        if (!process.env.MONGO_URI){
+            console.warn("MONGO_URI is not in env. database will not connect");
+        } else {
+            await mongoose.connect(process.env.MONGO_URI);
+            console.log("mongoDB connected");
+        }
+
 app.listen(PORT, () => {
     console.log(`server runnning on http://localhost:${PORT}`);
 });
