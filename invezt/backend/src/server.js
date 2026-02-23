@@ -10,14 +10,12 @@ import stockRoutes from './routes/stockRoutes.js';
 dotenv.config();
 const app = express();
 
-app.use(cors{
+app.use(cors({
     origin: process.env.FRONTEND_URL || "*",
     credentials: false,
-    allowedHeaders: ["content-type", "authorzation"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-})
-);
-
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -43,11 +41,11 @@ const startServer = async () => {
             console.log("mongoDB connected");
         }
 
-app.listen(PORT, () => {
-    console.log(`server runnning on http://localhost:${PORT}`);
+        app.listen(PORT, () => {
+          console.log(`server runnning on http://localhost:${PORT}`);
 });
     } catch(err){
-        console.error("failed to start server: ", err.massage);
+        console.error("failed to start server: ", err.message);
         process.exit(1);
     }
 };
