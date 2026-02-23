@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-app.use('/api/auth', authenticationMiddleware, authenticationRoutes);
+app.use('/api/auth', authenticationRoutes);
 app.use('/api/stocks', authenticationMiddleware, stockRoutes);
 
 app.get('/', (req, res) => {
