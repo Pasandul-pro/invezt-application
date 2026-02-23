@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 const authMiddleware = (req,res, next) => {
     console.log(`[${new Date().toISOString()}] authentication middleware triggered`)
 
