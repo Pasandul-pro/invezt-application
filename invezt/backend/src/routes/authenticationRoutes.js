@@ -21,15 +21,23 @@ router.post("/login", async(req, res) => {
             role: "user",
         };
 
+        const token = jwt.sign(userSessionData, process.env.jwt_pw,{
+            expiresIn: "1h",
+        });
+
         return res.json(
             {
-                status: "error",
+                status: "success",
                 message: "logged in",
                 token,
             });
-
-        
-    res.json({status:"success", message: "authentication route" });
+    }catch(err){
+        return res.status(500).json(
+            {
+                status: "error",
+                message: "login failed",
+            });
+    }
 });
 
 export default router;
