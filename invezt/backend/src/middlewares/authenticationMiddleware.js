@@ -1,19 +1,22 @@
 import jwt from "jsonwebtoken";
 
-const authMiddleware = (req,res, next) => {
-    console.log(`[${new Date().toISOString()}] authentication middleware triggered`)
-
+const authenticationMiddleware = (req,res,next) => {
     try{
-        next();
+        const authenticationHeader = req.headers.authorization || "";
+        const token = authenticationHeader.startsWith("Bearer ")
+        ? authenticationHeader.slice(7).trim()
+        : " ";
+
+        if (!token){
+            return res.status(401).json(
+                {
+                    status: "error",
+                    message: "unauthorized access"
+                });
     }
 
     catch(error){
-        return res.status(401).json(
-            {
-                status: "error",
-                message: "unauthorized access"
-            }
-        )
+        
     };
 };
 
