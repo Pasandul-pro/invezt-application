@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin: process.env.frontend_url || "*",
     credentials: false,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -30,19 +30,19 @@ app.get('/', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 5001;
+const port = process.env.port || 5001;
 
 const startServer = async () => {
     try {
-        if (!process.env.MONGO_URI){
-            console.warn("MONGO_URI is not in env. database will not connect");
+        if (!process.env.db_url){
+            console.warn("db_url is not in env. database will not connect");
         } else {
-            await mongoose.connect(process.env.MONGO_URI);
+            await mongoose.connect(process.env.db_url);
             console.log("mongoDB connected");
         }
 
-        app.listen(PORT, () => {
-          console.log(`server runnning on http://localhost:${PORT}`);
+        app.listen(port, () => {
+          console.log(`server runnning on http://localhost:${port}`);
 });
     } catch(err){
         console.error("failed to start server: ", err.message);
