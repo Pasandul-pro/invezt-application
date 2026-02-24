@@ -5,19 +5,29 @@ const authenticationMiddleware = (req,res,next) => {
         const authenticationHeader = req.headers.authorization || "";
         const token = authenticationHeader.startsWith("Bearer ")
         ? authenticationHeader.slice(7).trim()
-        : " ";
+        : "";
 
         if (!token){
             return res.status(401).json(
                 {
                     status: "error",
-                    message: "unauthorized access"
+                    message: "missing token"
                 });
-    }
-
-    catch(error){
+       }
         
-    };
+       const userData = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = userData;
+
+        return next();
+
+    }catch(error){
+        return res.status(401).json(
+            {
+                status: "error",
+                message: "invalid or expired token",
+            });
+        
+    }
 };
 
-export default authMiddleware;
+export default authenticationMiddleware;
