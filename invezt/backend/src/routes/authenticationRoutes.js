@@ -14,6 +14,21 @@ router.post("/login", async(req, res) => {
                     message: "enter your email",
                 });
         }
+
+        const userSessionData = {
+            userID: "user_id",
+            email,
+            role: "user",
+        };
+
+        return res.json(
+            {
+                status: "error",
+                message: "logged in",
+                token,
+            });
+
+        
     res.json({status:"success", message: "authentication route" });
 });
 
