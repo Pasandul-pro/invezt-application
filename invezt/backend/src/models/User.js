@@ -64,5 +64,10 @@ const userFile = new mongoose.Schema(
     {timestamps: true}
 );
 
+userFile.index({ firebaseUid: 1});
+userFile.index({ watchlist: 1});
+userFile.index({ portfolio: 1});
+userFile.index({ status: 1, role: 1});
+
 const User = mongoose.model('User', userFile);
 export default User;
