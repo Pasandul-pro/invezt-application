@@ -45,6 +45,8 @@ const sessionFile = new mongoose.Schema(
 
 sessionFile.index({validUntil: 1}, {expireAfterSeconds: 0});
 
+sessionFile.index({firebaseUid: 1, isActive: 1});
+
 const Session = mongoose.model('Session', sessionFile);
 export default Session;
 
