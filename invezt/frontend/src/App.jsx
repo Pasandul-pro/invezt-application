@@ -308,7 +308,52 @@ function App() {
         </div>
 
 
-{/* ********************************* 2 - Bar chart, pie chart, pdf **************** */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '30px' }} className="print-card">
+          <div style={styles.chartCard}>
+            <h3 style={{ color: '#f8fafc', marginBottom: '20px' }}>📊 Price vs. Intrinsic Value</h3>
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer>
+                <BarChart data={chartData}>
+                  <XAxis dataKey="name" stroke="#94a3b8" />
+                  <YAxis stroke="#94a3b8" />
+                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
+                  <Legend />
+                  <Bar dataKey="GrahamValue" name="Graham Value" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="MarketPrice" name="Market Price" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div style={styles.chartCard}>
+            <h3 style={{ color: '#f8fafc', marginBottom: '20px' }}>🥧 Portfolio Sector Exposure</h3>
+            <div style={{ width: '100%', height: 300 }}>
+              {sectorData.length > 0 ? (
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie data={sectorData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                      {sectorData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>No sector data available yet.</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '15px' }} className="no-print">
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
+            <input type="text" placeholder="🔍 Search by Ticker or Name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ ...styles.input, minWidth: '200px' }} />
+            <button onClick={() => setFilterSignal('ALL')} style={{ ...styles.filterBtn, background: filterSignal === 'ALL' ? '#3b82f6' : '#1e293b' }}>🌐 All</button>
+            <button onClick={() => setFilterSignal('STRONG BUY')} style={{ ...styles.filterBtn, background: filterSignal === 'STRONG BUY' ? '#22c55e' : '#1e293b' }}>🔥 Strong Buy</button>
+            <button onClick={() => setFilterSignal('BUY')} style={{ ...styles.filterBtn, background: filterSignal === 'BUY' ? '#4ade80' : '#1e293b', color: filterSignal === 'BUY' ? '#000' : '#fff' }}>✅ Buy</button>
+            <button onClick={() => setFilterSignal('HOLD')} style={{ ...styles.filterBtn, background: filterSignal === 'HOLD' ? '#eab308' : '#1e293b' }}>⚖️ Hold</button>
+            <button onClick={() => setFilterSignal('OVERVALUED')} style={{ ...styles.filterBtn, background: filterSignal === 'OVERVALUED' ? '#ef4444' : '#1e293b' }}>🚨 Overvalued</button>
+          </div>
+          <button onClick={() => window.print()} style={styles.pdfBtn}>📄 Download PDF Report</button>
+        </div>
 
 
 {/* *************************** 3 - Invezt Market Analyzer ************************************** */}
