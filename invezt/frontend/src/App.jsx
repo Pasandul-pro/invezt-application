@@ -271,7 +271,41 @@ function App() {
         <hr style={{ border: '1px solid #334155', margin: '50px 0' }} className="no-print" />
         <h2 style={{ color: '#f8fafc', marginBottom: '20px' }}>Invezt Market Analyzer</h2>
 
-{/* ********************************* 1 - Grid ******************************* */}
+        <div id="database-section" style={styles.formCard} className="no-print">
+          <h2 style={{ color: '#f8fafc', marginBottom: '20px', fontSize: '18px' }}>{editingId ? '✏️ Edit Position' : '➕ Add New Ticker for Analysis'}</h2>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+              <input name="ticker" placeholder="Ticker (e.g. COMB)" value={formData.ticker} onChange={handleChange} required disabled={!!editingId} style={{ ...styles.input, flex: 1 }} />
+              <button type="button" onClick={handleAutoFetch} disabled={!!editingId} style={styles.fetchBtn}>🔍 Auto-Fetch</button>
+            </div>
+
+            <div style={{ padding: '15px', backgroundColor: '#0f172a', borderRadius: '8px', border: '1px solid #3b82f6', marginBottom: '15px' }}>
+              <h4 style={{ color: '#60a5fa', marginBottom: '10px' }}>My Holdings (Optional)</h4>
+              <div style={styles.inputGroup}>
+                <input name="quantity" placeholder="Shares Owned" value={formData.quantity} onChange={handleChange} style={styles.input} />
+                <input name="avgCost" placeholder="Average Cost" value={formData.avgCost} onChange={handleChange} style={styles.input} />
+              </div>
+            </div>
+
+            <div style={styles.inputGroup}>
+              <input name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleChange} required style={styles.input} />
+              <input name="sector" placeholder="Sector" value={formData.sector} onChange={handleChange} required style={styles.input} />
+              <input name="currentPrice" placeholder="Price (LKR)" value={formData.currentPrice} onChange={handleChange} required style={styles.input} />
+              <input name="eps" placeholder="EPS" value={formData.eps} onChange={handleChange} style={styles.input} />
+              <input name="peRatio" placeholder="P/E Ratio" value={formData.peRatio} onChange={handleChange} style={styles.input} />
+              <input name="pbRatio" placeholder="P/B Ratio" value={formData.pbRatio} onChange={handleChange} style={styles.input} />
+              <input name="roe" placeholder="ROE (%)" value={formData.roe} onChange={handleChange} style={styles.input} />
+              <input name="dividendYield" placeholder="Div Yield (%)" value={formData.dividendYield} onChange={handleChange} style={styles.input} />
+              <input name="currentRatio" placeholder="Current Ratio" value={formData.currentRatio} onChange={handleChange} style={styles.input} />
+              <input name="quickRatio" placeholder="Quick Ratio" value={formData.quickRatio} onChange={handleChange} style={styles.input} />
+              <input name="pegRatio" placeholder="PEG Ratio" value={formData.pegRatio} onChange={handleChange} style={styles.input} />
+              <input name="beta" placeholder="Beta (Volatility)" value={formData.beta} onChange={handleChange} style={styles.input} />
+              <input name="earningsYield" placeholder="Earnings Yield (%)" value={formData.earningsYield} onChange={handleChange} style={styles.input} />
+            </div>
+
+            <button type="submit" style={styles.submitBtn}>{editingId ? 'Update Analytics' : 'Save to Database'}</button>
+          </form>
+        </div>
 
 
 {/* ********************************* 2 - Bar chart, pie chart, pdf **************** */}
