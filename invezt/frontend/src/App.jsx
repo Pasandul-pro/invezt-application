@@ -356,8 +356,63 @@ function App() {
         </div>
 
 
-{/* *************************** 3 - Invezt Market Analyzer ************************************** */}
-      
+        <div style={styles.grid}>
+          {processedStocks.map((stock) => {
+            const signal = getValuationSignal(stock);
+            const rawGraham = calculateGrahamRaw(stock);
+            const expectedReturn = calculateCAPM(stock);
+
+            const qty = stock.holdings?.quantity || 0;
+            const cost = stock.holdings?.avgCost || 0;
+            const totalInvested = qty * cost;
+            const currentValue = qty * stock.currentPrice;
+            const profitLoss = currentValue - totalInvested;
+            const profitLossPercent = totalInvested > 0 ? ((profitLoss / totalInvested) * 100).toFixed(2) : 0;
+            const isProfit = profitLoss >= 0;
+
+            return (
+              <div key={stock._id} style={styles.card} className="print-card">
+                <div style={styles.cardHeader}>
+                  <h2 style={styles.ticker}>{stock.ticker}</h2>
+                  <div className="no-print">
+                    <button type="button" onClick={() => handleEditClick(stock)} style={styles.iconBtn}>✏️</button>
+                    <button type="button" onClick={() => handleDelete(stock._id)} style={styles.iconBtn}>🗑️</button>
+                  </div>
+                </div>
+                <p style={styles.companyName}>{stock.companyName}</p>
+                <div style={styles.priceContainer}>
+                  <span style={styles.price}>LKR {stock.currentPrice}</span>
+                  <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', color: signal.color, backgroundColor: signal.bg }}>{signal.text}</span>
+                </div>
+
+                {qty > 0 && (
+                  <div style={{ margin: '15px 0', padding: '12px', backgroundColor: '#0f172a', borderRadius: '8px', borderLeft: `4px solid ${isProfit ? '#22c55e' : '#ef4444'}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>Holdings: <strong>{qty}</strong></span>
+                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>Avg Price: <strong>LKR {cost}</strong></span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                      <span style={{ fontSize: '14px' }}>Total P/L:</span>
+                      <span style={{ fontSize: '16px', fontWeight: 'bold', color: isProfit ? '#22c55e' : '#ef4444' }}>
+                        {isProfit ? '+' : ''}LKR {profitLoss.toLocaleString()} ({isProfit ? '+' : ''}{profitLossPercent}%)
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <table style={styles.table}>
+                  <tbody>
+                    <tr style={styles.tableRow}><td style={styles.tableLabel}>Graham Number</td><td style={{ ...styles.tableValue, color: '#38bdf8' }}>{rawGraham > 0 ? `LKR ${rawGraham.toFixed(2)}` : 'N/A'}</td></tr>
+                    <tr style={styles.tableRow}><td style={styles.tableLabel}>Expected Return (CAPM)</td><td style={{ ...styles.tableValue, color: '#f59e0b' }}>{expectedReturn ? `${expectedReturn}%` : 'N/A'}</td></tr>
+                    <tr style={styles.tableRow}><td style={styles.tableLabel}>P/E Ratio</td><td style={styles.tableValue}>{stock.ratios?.peRatio || '-'}</td></tr>
+                    <tr style={styles.tableRow}><td style={styles.tableLabel}>P/B Ratio</td><td style={styles.tableValue}>{stock.ratios?.pbRatio || '-'}</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
+        </div>
+  
       </div>
     </div>
   );
