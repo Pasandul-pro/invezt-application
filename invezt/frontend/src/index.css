@@ -1,0 +1,13 @@
+/* 1. Tell every element to calculate size properly */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2. Force the background, body, and React Root to be 100% full screen */
+html, body, #root {
+  width: 100vw;
+  min-height: 100vh;
+  background-color: #0f172a; /* Matches your dark dashboard! */
+}
