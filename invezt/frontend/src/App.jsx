@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
 
 function App() {
+  // --- 1. NEW STATE FOR NAVIGATION & LIVE DATA ---
+  const [activeTab, setActiveTab] = useState('Dashboard');
+  const [liveUsd, setLiveUsd] = useState('Loading...');
+  
+  // Existing States
   const [stocks, setStocks] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,22 +15,36 @@ function App() {
 
   const [formData, setFormData] = useState({
     ticker: '', companyName: '', sector: '', currentPrice: '',
-    marketCap: '', volume: '',
-    quantity: '', avgCost: '',
+    marketCap: '', volume: '', quantity: '', avgCost: '',
     eps: '', peRatio: '', pbRatio: '', roe: '', dividendYield: '',
     currentRatio: '', quickRatio: '', pegRatio: '', beta: '', earningsYield: ''
   });
 
   useEffect(() => {
+    // Fetch Stocks
     fetch('http://localhost:5000/api/stocks')
       .then(response => response.json())
       .then(data => setStocks(data))
       .catch(error => console.error("Error fetching stocks:", error));
 
+    // Fetch Market Highlights (ASPI, S&P SL20)
     fetch('http://localhost:5000/api/market-highlights')
       .then(response => response.json())
       .then(data => setMarketHighlights(data))
       .catch(error => console.error("Error fetching market data:", error));
+
+    // --- 2. NEW: FETCH REAL-TIME USD/LKR RATE ---
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.rates && data.rates.LKR) {
+          setLiveUsd(`Rs. ${data.rates.LKR.toFixed(2)}`);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching live USD:", error);
+        setLiveUsd('Unavailable');
+      });
   }, []);
 
   const handleChange = (e) => {
@@ -43,7 +62,11 @@ function App() {
       currentRatio: stock.ratios?.currentRatio || '', quickRatio: stock.ratios?.quickRatio || '',
       pegRatio: stock.ratios?.pegRatio || '', beta: stock.ratios?.beta || '', earningsYield: stock.ratios?.earningsYield || ''
     });
-    window.scrollTo({ top: document.getElementById('database-section').offsetTop - 50, behavior: 'smooth' });
+    // Switch to analyzer tab and scroll down
+    setActiveTab('Analyzer');
+    setTimeout(() => {
+      window.scrollTo({ top: document.getElementById('database-section').offsetTop - 50, behavior: 'smooth' });
+    }, 100);
   };
 
   const handleAutoFetch = async () => {
@@ -94,6 +117,7 @@ function App() {
           eps: '', peRatio: '', pbRatio: '', roe: '', dividendYield: '', currentRatio: '', quickRatio: '', pegRatio: '', beta: '', earningsYield: ''
         });
         setEditingId(null);
+        alert('Analysis Saved Successfully!');
       }
     } catch (error) { console.error("Failed to save:", error); }
   };
@@ -172,276 +196,282 @@ function App() {
         `}
       </style>
 
-      {/* --- NEW: ALIGNED FULL NAVIGATION HEADER --- */}
+      {/* --- 3. DYNAMIC NAVIGATION HEADER --- */}
       <header style={styles.header} className="no-print">
         <div style={styles.headerContent}>
           <div style={styles.logo}>Invezt</div>
           <nav style={styles.nav}>
-            <a href="#" style={styles.navLinkActive}>Dashboard</a>
-            <a href="#" style={styles.navLink}>Analyzer</a>
-            <a href="#" style={styles.navLink}>Compare</a>
-            <a href="#" style={styles.navLink}>Portfolio</a>
-            <a href="#" style={styles.navLink}>Valuation Models</a>
-            <a href="#" style={styles.navLink}>News</a>
-            <a href="#" style={styles.navLink}>Logout</a>
+            <button onClick={() => setActiveTab('Dashboard')} style={activeTab === 'Dashboard' ? styles.navLinkActive : styles.navLink}>Dashboard</button>
+            <button onClick={() => setActiveTab('Analyzer')} style={activeTab === 'Analyzer' ? styles.navLinkActive : styles.navLink}>Analyzer</button>
+            <button onClick={() => setActiveTab('Watchlist')} style={activeTab === 'Watchlist' ? styles.navLinkActive : styles.navLink}>Watchlist</button>
+            <button onClick={() => alert("Portfolio feature coming soon!")} style={styles.navLink}>Portfolio</button>
+            <button onClick={() => alert("News module loading...")} style={styles.navLink}>News</button>
           </nav>
         </div>
       </header>
 
       <div style={styles.container}>
-        <div style={styles.hero}>
-          <h1 style={{ fontSize: '36px', marginBottom: '15px' }}>Welcome to Your Dashboard</h1>
-          <p style={{ opacity: 0.9, fontSize: '18px' }}>Track, analyze, and manage your investments in Sri Lankan stocks</p>
-        </div>
-
-        {/* --- NEW: QUICK ACTIONS GRID (FROM WIREFRAME) --- */}
-        <h2 style={{ color: '#f8fafc', marginBottom: '20px' }} className="no-print">Quick Actions</h2>
-        <div style={styles.quickActionsGrid} className="no-print">
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Analyze Stock</h3>
-            <p style={styles.actionCardText}>Search and analyze any Sri Lankan stock</p>
-            <button style={styles.actionBtn}>Go</button>
+        
+        {/* --- VIEW: WATCHLIST (PLACEHOLDER) --- */}
+        {activeTab === 'Watchlist' && (
+          <div style={{ textAlign: 'center', padding: '100px 20px' }}>
+            <h1 style={{ color: '#60a5fa', fontSize: '32px' }}>⭐ Your Watchlist</h1>
+            <p style={{ color: '#94a3b8', fontSize: '18px' }}>This is the next module we will build! It will track stocks separately from your portfolio.</p>
           </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Compare Companies</h3>
-            <p style={styles.actionCardText}>Compare up to 3 Sri Lankan companies</p>
-            <button style={styles.actionBtn}>Go</button>
-          </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Create Portfolio</h3>
-            <p style={styles.actionCardText}>Build and track your portfolio</p>
-            <button style={styles.actionBtn}>Go</button>
-          </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Valuation Models</h3>
-            <p style={styles.actionCardText}>Learn about CAPM, DCF, and other models</p>
-            <button style={styles.actionBtn}>Go</button>
-          </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Company Reports</h3>
-            <p style={styles.actionCardText}>Valuate your company Through Your Report</p>
-            <button style={styles.actionBtn}>Go</button>
-          </div>
-        </div>
+        )}
 
-        {/* --- MARKET HIGHLIGHTS --- */}
-        <h2 style={{ color: '#f8fafc', marginTop: '30px', marginBottom: '20px' }}>Market Highlights</h2>
-        <div style={styles.marketHighlights}>
-          {['ASPI', 'S&P SL20', 'LKR/USD'].map((item, idx) => {
-            const isPositive = marketHighlights ? (idx === 0 ? marketHighlights.aspi.isPositive : idx === 1 ? marketHighlights.sp20.isPositive : false) : true;
-            const valueColor = idx === 2 ? '#ef4444' : (isPositive ? '#22c55e' : '#ef4444');
-
-            return (
-              <div key={item} style={styles.highlightCard}>
-                <h3 style={styles.highlightHeader}>{item}</h3>
-                <p style={{ fontSize: '24px', fontWeight: 'bold', color: valueColor }}>
-                  {marketHighlights ? (idx === 0 ? marketHighlights.aspi.value : idx === 1 ? marketHighlights.sp20.value : marketHighlights.usdToLkr) : '...'}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* --- NEW: NEWS SECTIONS (FROM WIREFRAME) --- */}
-        <div className="no-print">
-          <div style={styles.newsCard}>
-            <h3 style={styles.newsTitle}>Latest News</h3>
-            <p style={styles.newsText}>John Keells Holdings reports strong quarterly earnings amid tourism sector recovery...</p>
-            <button style={styles.actionBtn}>View All News & Notifications</button>
-          </div>
-
-          <h2 style={{ color: '#f8fafc', marginTop: '30px', marginBottom: '20px' }}>Daily Market Update</h2>
-          <div style={styles.newsCard}>
-            <h3 style={styles.newsTitle}>CSE Market Update</h3>
-            <p style={styles.newsText}>Colombo Stock Exchange shows positive momentum with banking and manufacturing sectors leading gains.</p>
-            <button style={styles.actionBtn}>Read More</button>
-          </div>
-
-          <h2 style={{ color: '#f8fafc', marginTop: '30px', marginBottom: '20px' }}>Company Report Valuation</h2>
-          <div style={styles.newsCard}>
-            <h3 style={styles.newsTitle}>Company Report Valuation</h3>
-            <p style={styles.newsText}>Enter your company Report and Get the Evaluation directly applied to your analysis.</p>
-            <button style={styles.actionBtn}>Read More</button>
-          </div>
-        </div>
-
-        {/* =========================================================
-            EXISTING MARKET ANALYSIS ENGINE (BOTTOM SECTION)
-            ========================================================= */}
-        <hr style={{ border: '1px solid #334155', margin: '50px 0' }} className="no-print" />
-        <h2 style={{ color: '#f8fafc', marginBottom: '20px' }}>Invezt Market Analyzer</h2>
-
-        <div id="database-section" style={styles.formCard} className="no-print">
-          <h2 style={{ color: '#f8fafc', marginBottom: '20px', fontSize: '18px' }}>{editingId ? '✏️ Edit Position' : '➕ Add New Ticker for Analysis'}</h2>
-          <form onSubmit={handleSubmit} style={styles.form}>
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-              <input name="ticker" placeholder="Ticker (e.g. COMB)" value={formData.ticker} onChange={handleChange} required disabled={!!editingId} style={{ ...styles.input, flex: 1 }} />
-              <button type="button" onClick={handleAutoFetch} disabled={!!editingId} style={styles.fetchBtn}>🔍 Auto-Fetch</button>
-            </div>
-
-            <div style={{ padding: '15px', backgroundColor: '#0f172a', borderRadius: '8px', border: '1px solid #3b82f6', marginBottom: '15px' }}>
-              <h4 style={{ color: '#60a5fa', marginBottom: '10px' }}>My Holdings (Optional)</h4>
-              <div style={styles.inputGroup}>
-                <input name="quantity" placeholder="Shares Owned" value={formData.quantity} onChange={handleChange} style={styles.input} />
-                <input name="avgCost" placeholder="Average Cost" value={formData.avgCost} onChange={handleChange} style={styles.input} />
-              </div>
-            </div>
-
-            <div style={styles.inputGroup}>
-              <input name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleChange} required style={styles.input} />
-              <input name="sector" placeholder="Sector" value={formData.sector} onChange={handleChange} required style={styles.input} />
-              <input name="currentPrice" placeholder="Price (LKR)" value={formData.currentPrice} onChange={handleChange} required style={styles.input} />
-              <input name="eps" placeholder="EPS" value={formData.eps} onChange={handleChange} style={styles.input} />
-              <input name="peRatio" placeholder="P/E Ratio" value={formData.peRatio} onChange={handleChange} style={styles.input} />
-              <input name="pbRatio" placeholder="P/B Ratio" value={formData.pbRatio} onChange={handleChange} style={styles.input} />
-              <input name="roe" placeholder="ROE (%)" value={formData.roe} onChange={handleChange} style={styles.input} />
-              <input name="dividendYield" placeholder="Div Yield (%)" value={formData.dividendYield} onChange={handleChange} style={styles.input} />
-              <input name="currentRatio" placeholder="Current Ratio" value={formData.currentRatio} onChange={handleChange} style={styles.input} />
-              <input name="quickRatio" placeholder="Quick Ratio" value={formData.quickRatio} onChange={handleChange} style={styles.input} />
-              <input name="pegRatio" placeholder="PEG Ratio" value={formData.pegRatio} onChange={handleChange} style={styles.input} />
-              <input name="beta" placeholder="Beta (Volatility)" value={formData.beta} onChange={handleChange} style={styles.input} />
-              <input name="earningsYield" placeholder="Earnings Yield (%)" value={formData.earningsYield} onChange={handleChange} style={styles.input} />
-            </div>
-
-            <button type="submit" style={styles.submitBtn}>{editingId ? 'Update Analytics' : 'Save to Database'}</button>
-          </form>
-        </div>
-
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '30px' }} className="print-card">
-          <div style={styles.chartCard}>
-            <h3 style={{ color: '#f8fafc', marginBottom: '20px' }}>📊 Price vs. Intrinsic Value</h3>
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer>
-                <BarChart data={chartData}>
-                  <XAxis dataKey="name" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" />
-                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
-                  <Legend />
-                  <Bar dataKey="GrahamValue" name="Graham Value" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="MarketPrice" name="Market Price" fill="#38bdf8" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div style={styles.chartCard}>
-            <h3 style={{ color: '#f8fafc', marginBottom: '20px' }}>🥧 Portfolio Sector Exposure</h3>
-            <div style={{ width: '100%', height: 300 }}>
-              {sectorData.length > 0 ? (
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie data={sectorData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                      {sectorData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>No sector data available yet.</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '15px' }} className="no-print">
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-            <input type="text" placeholder="🔍 Search by Ticker or Name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ ...styles.input, minWidth: '200px' }} />
-            <button onClick={() => setFilterSignal('ALL')} style={{ ...styles.filterBtn, background: filterSignal === 'ALL' ? '#3b82f6' : '#1e293b' }}>🌐 All</button>
-            <button onClick={() => setFilterSignal('STRONG BUY')} style={{ ...styles.filterBtn, background: filterSignal === 'STRONG BUY' ? '#22c55e' : '#1e293b' }}>🔥 Strong Buy</button>
-            <button onClick={() => setFilterSignal('BUY')} style={{ ...styles.filterBtn, background: filterSignal === 'BUY' ? '#4ade80' : '#1e293b', color: filterSignal === 'BUY' ? '#000' : '#fff' }}>✅ Buy</button>
-            <button onClick={() => setFilterSignal('HOLD')} style={{ ...styles.filterBtn, background: filterSignal === 'HOLD' ? '#eab308' : '#1e293b' }}>⚖️ Hold</button>
-            <button onClick={() => setFilterSignal('OVERVALUED')} style={{ ...styles.filterBtn, background: filterSignal === 'OVERVALUED' ? '#ef4444' : '#1e293b' }}>🚨 Overvalued</button>
-          </div>
-          <button onClick={() => window.print()} style={styles.pdfBtn}>📄 Download PDF Report</button>
-        </div>
-
-
-        <div style={styles.grid}>
-          {processedStocks.map((stock) => {
-            const signal = getValuationSignal(stock);
-            const rawGraham = calculateGrahamRaw(stock);
-            const expectedReturn = calculateCAPM(stock);
-
-            const qty = stock.holdings?.quantity || 0;
-            const cost = stock.holdings?.avgCost || 0;
-            const totalInvested = qty * cost;
-            const currentValue = qty * stock.currentPrice;
-            const profitLoss = currentValue - totalInvested;
-            const profitLossPercent = totalInvested > 0 ? ((profitLoss / totalInvested) * 100).toFixed(2) : 0;
-            const isProfit = profitLoss >= 0;
-
-            return (
-              <div key={stock._id} style={styles.card} className="print-card">
-                <div style={styles.cardHeader}>
-                  <h2 style={styles.ticker}>{stock.ticker}</h2>
-                  <div className="no-print">
-                    <button type="button" onClick={() => handleEditClick(stock)} style={styles.iconBtn}>✏️</button>
-                    <button type="button" onClick={() => handleDelete(stock._id)} style={styles.iconBtn}>🗑️</button>
-                  </div>
-                </div>
-                <p style={styles.companyName}>{stock.companyName}</p>
-                <div style={styles.priceContainer}>
-                  <span style={styles.price}>LKR {stock.currentPrice}</span>
-                  <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', color: signal.color, backgroundColor: signal.bg }}>{signal.text}</span>
+        {/* --- VIEW: ANALYZER --- */}
+        {activeTab === 'Analyzer' && (
+          <div style={{ paddingTop: '20px' }}>
+             <h1 style={{ color: '#f8fafc', marginBottom: '20px' }}>Invezt Market Analyzer</h1>
+             {/* The form from below is moved here conceptually, or user scrolls to it */}
+             <div id="database-section" style={styles.formCard} className="no-print">
+              <h2 style={{ color: '#f8fafc', marginBottom: '20px', fontSize: '18px' }}>{editingId ? '✏️ Edit Position' : '➕ Add New Ticker for Analysis'}</h2>
+              <form onSubmit={handleSubmit} style={styles.form}>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                  <input name="ticker" placeholder="Ticker (e.g. COMB)" value={formData.ticker} onChange={handleChange} required disabled={!!editingId} style={{ ...styles.input, flex: 1 }} />
+                  <button type="button" onClick={handleAutoFetch} disabled={!!editingId} style={styles.fetchBtn}>🔍 Auto-Fetch</button>
                 </div>
 
-                {qty > 0 && (
-                  <div style={{ margin: '15px 0', padding: '12px', backgroundColor: '#0f172a', borderRadius: '8px', borderLeft: `4px solid ${isProfit ? '#22c55e' : '#ef4444'}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>Holdings: <strong>{qty}</strong></span>
-                      <span style={{ color: '#94a3b8', fontSize: '13px' }}>Avg Price: <strong>LKR {cost}</strong></span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                      <span style={{ fontSize: '14px' }}>Total P/L:</span>
-                      <span style={{ fontSize: '16px', fontWeight: 'bold', color: isProfit ? '#22c55e' : '#ef4444' }}>
-                        {isProfit ? '+' : ''}LKR {profitLoss.toLocaleString()} ({isProfit ? '+' : ''}{profitLossPercent}%)
-                      </span>
-                    </div>
+                <div style={{ padding: '15px', backgroundColor: '#0f172a', borderRadius: '8px', border: '1px solid #3b82f6', marginBottom: '15px' }}>
+                  <h4 style={{ color: '#60a5fa', marginBottom: '10px' }}>My Holdings (Optional)</h4>
+                  <div style={styles.inputGroup}>
+                    <input name="quantity" placeholder="Shares Owned" value={formData.quantity} onChange={handleChange} style={styles.input} />
+                    <input name="avgCost" placeholder="Average Cost" value={formData.avgCost} onChange={handleChange} style={styles.input} />
                   </div>
-                )}
+                </div>
 
-                <table style={styles.table}>
-                  <tbody>
-                    <tr style={styles.tableRow}><td style={styles.tableLabel}>Graham Number</td><td style={{ ...styles.tableValue, color: '#38bdf8' }}>{rawGraham > 0 ? `LKR ${rawGraham.toFixed(2)}` : 'N/A'}</td></tr>
-                    <tr style={styles.tableRow}><td style={styles.tableLabel}>Expected Return (CAPM)</td><td style={{ ...styles.tableValue, color: '#f59e0b' }}>{expectedReturn ? `${expectedReturn}%` : 'N/A'}</td></tr>
-                    <tr style={styles.tableRow}><td style={styles.tableLabel}>P/E Ratio</td><td style={styles.tableValue}>{stock.ratios?.peRatio || '-'}</td></tr>
-                    <tr style={styles.tableRow}><td style={styles.tableLabel}>P/B Ratio</td><td style={styles.tableValue}>{stock.ratios?.pbRatio || '-'}</td></tr>
-                  </tbody>
-                </table>
+                <div style={styles.inputGroup}>
+                  <input name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleChange} required style={styles.input} />
+                  <input name="sector" placeholder="Sector" value={formData.sector} onChange={handleChange} required style={styles.input} />
+                  <input name="currentPrice" placeholder="Price (LKR)" value={formData.currentPrice} onChange={handleChange} required style={styles.input} />
+                  <input name="eps" placeholder="EPS" value={formData.eps} onChange={handleChange} style={styles.input} />
+                  <input name="peRatio" placeholder="P/E Ratio" value={formData.peRatio} onChange={handleChange} style={styles.input} />
+                  <input name="pbRatio" placeholder="P/B Ratio" value={formData.pbRatio} onChange={handleChange} style={styles.input} />
+                  <input name="roe" placeholder="ROE (%)" value={formData.roe} onChange={handleChange} style={styles.input} />
+                  <input name="dividendYield" placeholder="Div Yield (%)" value={formData.dividendYield} onChange={handleChange} style={styles.input} />
+                  <input name="currentRatio" placeholder="Current Ratio" value={formData.currentRatio} onChange={handleChange} style={styles.input} />
+                  <input name="quickRatio" placeholder="Quick Ratio" value={formData.quickRatio} onChange={handleChange} style={styles.input} />
+                  <input name="pegRatio" placeholder="PEG Ratio" value={formData.pegRatio} onChange={handleChange} style={styles.input} />
+                  <input name="beta" placeholder="Beta (Volatility)" value={formData.beta} onChange={handleChange} style={styles.input} />
+                  <input name="earningsYield" placeholder="Earnings Yield (%)" value={formData.earningsYield} onChange={handleChange} style={styles.input} />
+                </div>
+
+                <button type="submit" style={styles.submitBtn}>{editingId ? 'Update Analytics' : 'Save to Database'}</button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* --- VIEW: DASHBOARD --- */}
+        {activeTab === 'Dashboard' && (
+          <>
+            <div style={styles.hero}>
+              <h1 style={{ fontSize: '36px', marginBottom: '15px' }}>Welcome to Your Dashboard</h1>
+              <p style={{ opacity: 0.9, fontSize: '18px' }}>Track, analyze, and manage your investments in Sri Lankan stocks</p>
+            </div>
+
+            {/* --- 4. FUNCTIONAL QUICK ACTIONS GRID --- */}
+            <h2 style={{ color: '#f8fafc', marginBottom: '20px' }} className="no-print">Quick Actions</h2>
+            <div style={styles.quickActionsGrid} className="no-print">
+              <div style={styles.actionCard}>
+                <h3 style={styles.actionCardTitle}>Analyze Stock</h3>
+                <p style={styles.actionCardText}>Search and analyze any Sri Lankan stock</p>
+                <button onClick={() => setActiveTab('Analyzer')} style={styles.actionBtn}>Go to Analyzer</button>
               </div>
-            );
-          })}
-        </div>
-  
+              <div style={styles.actionCard}>
+                <h3 style={styles.actionCardTitle}>Watchlist</h3>
+                <p style={styles.actionCardText}>Build and track your stock watchlist</p>
+                <button onClick={() => setActiveTab('Watchlist')} style={styles.actionBtn}>View Watchlist</button>
+              </div>
+              <div style={styles.actionCard}>
+                <h3 style={styles.actionCardTitle}>Export Portfolio</h3>
+                <p style={styles.actionCardText}>Generate a PDF of your current dashboard</p>
+                <button onClick={() => window.print()} style={styles.actionBtn}>Print PDF</button>
+              </div>
+            </div>
+
+            {/* --- 5. LIVE MARKET HIGHLIGHTS (WITH REAL USD) --- */}
+            <h2 style={{ color: '#f8fafc', marginTop: '30px', marginBottom: '20px' }}>Market Highlights</h2>
+            <div style={styles.marketHighlights}>
+              {['ASPI', 'S&P SL20', 'LKR/USD (Live)'].map((item, idx) => {
+                const isPositive = marketHighlights ? (idx === 0 ? marketHighlights.aspi?.isPositive : idx === 1 ? marketHighlights.sp20?.isPositive : false) : true;
+                const valueColor = idx === 2 ? '#38bdf8' : (isPositive ? '#22c55e' : '#ef4444');
+
+                return (
+                  <div key={item} style={styles.highlightCard}>
+                    <h3 style={styles.highlightHeader}>{item}</h3>
+                    <p style={{ fontSize: '24px', fontWeight: 'bold', color: valueColor }}>
+                      {idx === 2 ? liveUsd : (marketHighlights ? (idx === 0 ? marketHighlights.aspi?.value : marketHighlights.sp20?.value) : '...')}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* --- 6. FUNCTIONAL NEWS & VALUATION WIDGETS --- */}
+            <div className="no-print">
+              <div style={styles.newsCard}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <h3 style={styles.newsTitle}>Latest News (CSE)</h3>
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>Live Updates</span>
+                </div>
+                <p style={styles.newsText}>• John Keells Holdings reports strong quarterly earnings amid tourism sector recovery.</p>
+                <p style={styles.newsText}>• Central Bank of Sri Lanka announces new monetary policy review.</p>
+                <button onClick={() => window.open('https://www.cse.lk/', '_blank')} style={styles.actionBtnSecondary}>View All News & Notifications</button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px' }}>
+                <div style={styles.newsCard}>
+                  <h3 style={styles.newsTitle}>Daily Market Update</h3>
+                  <p style={styles.newsText}>Colombo Stock Exchange shows positive momentum with banking and manufacturing sectors leading gains.</p>
+                  <button onClick={() => alert('Fetching daily market summary...')} style={styles.actionBtnSecondary}>Read More</button>
+                </div>
+
+                <div style={styles.newsCard}>
+                  <h3 style={styles.newsTitle}>Company Report Valuation</h3>
+                  <p style={styles.newsText}>Enter your company Annual Report (PDF) to automatically extract EPS, P/E, and Debt Ratios.</p>
+                  <label htmlFor="file-upload" style={{ ...styles.actionBtnSecondary, display: 'inline-block', textAlign: 'center' }}>
+                    Upload Report (PDF)
+                  </label>
+                  <input id="file-upload" type="file" accept=".pdf" style={{ display: 'none' }} onChange={() => alert("File uploaded for analysis!")} />
+                </div>
+              </div>
+            </div>
+
+            <hr style={{ border: '1px solid #334155', margin: '50px 0' }} className="no-print" />
+
+            {/* --- CHARTS AND CARDS DISPLAY --- */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '30px' }} className="print-card">
+              <div style={styles.chartCard}>
+                <h3 style={{ color: '#f8fafc', marginBottom: '20px' }}>📊 Price vs. Intrinsic Value</h3>
+                <div style={{ width: '100%', height: 300 }}>
+                  <ResponsiveContainer>
+                    <BarChart data={chartData}>
+                      <XAxis dataKey="name" stroke="#94a3b8" />
+                      <YAxis stroke="#94a3b8" />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
+                      <Legend />
+                      <Bar dataKey="GrahamValue" name="Graham Value" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="MarketPrice" name="Market Price" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div style={styles.chartCard}>
+                <h3 style={{ color: '#f8fafc', marginBottom: '20px' }}>🥧 Portfolio Sector Exposure</h3>
+                <div style={{ width: '100%', height: 300 }}>
+                  {sectorData.length > 0 ? (
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie data={sectorData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                          {sectorData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>No sector data available yet.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* --- SEARCH AND FILTERS --- */}
+            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '15px' }} className="no-print">
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
+                <input type="text" placeholder="🔍 Search by Ticker or Name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ ...styles.input, minWidth: '200px' }} />
+                <button onClick={() => setFilterSignal('ALL')} style={{ ...styles.filterBtn, background: filterSignal === 'ALL' ? '#3b82f6' : '#1e293b' }}>🌐 All</button>
+                <button onClick={() => setFilterSignal('STRONG BUY')} style={{ ...styles.filterBtn, background: filterSignal === 'STRONG BUY' ? '#22c55e' : '#1e293b' }}>🔥 Strong Buy</button>
+                <button onClick={() => setFilterSignal('BUY')} style={{ ...styles.filterBtn, background: filterSignal === 'BUY' ? '#4ade80' : '#1e293b', color: filterSignal === 'BUY' ? '#000' : '#fff' }}>✅ Buy</button>
+                <button onClick={() => setFilterSignal('HOLD')} style={{ ...styles.filterBtn, background: filterSignal === 'HOLD' ? '#eab308' : '#1e293b' }}>⚖️ Hold</button>
+                <button onClick={() => setFilterSignal('OVERVALUED')} style={{ ...styles.filterBtn, background: filterSignal === 'OVERVALUED' ? '#ef4444' : '#1e293b' }}>🚨 Overvalued</button>
+              </div>
+            </div>
+
+            {/* --- STOCK CARDS --- */}
+            <div style={styles.grid}>
+              {processedStocks.map((stock) => {
+                const signal = getValuationSignal(stock);
+                const rawGraham = calculateGrahamRaw(stock);
+                const expectedReturn = calculateCAPM(stock);
+
+                const qty = stock.holdings?.quantity || 0;
+                const cost = stock.holdings?.avgCost || 0;
+                const totalInvested = qty * cost;
+                const currentValue = qty * stock.currentPrice;
+                const profitLoss = currentValue - totalInvested;
+                const profitLossPercent = totalInvested > 0 ? ((profitLoss / totalInvested) * 100).toFixed(2) : 0;
+                const isProfit = profitLoss >= 0;
+
+                return (
+                  <div key={stock._id} style={styles.card} className="print-card">
+                    <div style={styles.cardHeader}>
+                      <h2 style={styles.ticker}>{stock.ticker}</h2>
+                      <div className="no-print">
+                        <button type="button" onClick={() => handleEditClick(stock)} style={styles.iconBtn}>✏️</button>
+                        <button type="button" onClick={() => handleDelete(stock._id)} style={styles.iconBtn}>🗑️</button>
+                      </div>
+                    </div>
+                    <p style={styles.companyName}>{stock.companyName}</p>
+                    <div style={styles.priceContainer}>
+                      <span style={styles.price}>LKR {stock.currentPrice}</span>
+                      <span style={{ padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', color: signal.color, backgroundColor: signal.bg }}>{signal.text}</span>
+                    </div>
+
+                    {qty > 0 && (
+                      <div style={{ margin: '15px 0', padding: '12px', backgroundColor: '#0f172a', borderRadius: '8px', borderLeft: `4px solid ${isProfit ? '#22c55e' : '#ef4444'}` }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                          <span style={{ color: '#94a3b8', fontSize: '13px' }}>Holdings: <strong>{qty}</strong></span>
+                          <span style={{ color: '#94a3b8', fontSize: '13px' }}>Avg Price: <strong>LKR {cost}</strong></span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                          <span style={{ fontSize: '14px' }}>Total P/L:</span>
+                          <span style={{ fontSize: '16px', fontWeight: 'bold', color: isProfit ? '#22c55e' : '#ef4444' }}>
+                            {isProfit ? '+' : ''}LKR {profitLoss.toLocaleString()} ({isProfit ? '+' : ''}{profitLossPercent}%)
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <table style={styles.table}>
+                      <tbody>
+                        <tr style={styles.tableRow}><td style={styles.tableLabel}>Graham Number</td><td style={{ ...styles.tableValue, color: '#38bdf8' }}>{rawGraham > 0 ? `LKR ${rawGraham.toFixed(2)}` : 'N/A'}</td></tr>
+                        <tr style={styles.tableRow}><td style={styles.tableLabel}>Expected Return (CAPM)</td><td style={{ ...styles.tableValue, color: '#f59e0b' }}>{expectedReturn ? `${expectedReturn}%` : 'N/A'}</td></tr>
+                        <tr style={styles.tableRow}><td style={styles.tableLabel}>P/E Ratio</td><td style={styles.tableValue}>{stock.ratios?.peRatio || '-'}</td></tr>
+                        <tr style={styles.tableRow}><td style={styles.tableLabel}>P/B Ratio</td><td style={styles.tableValue}>{stock.ratios?.pbRatio || '-'}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-
 const styles = {
   pageWrapper: { fontFamily: 'Inter, sans-serif', backgroundColor: '#0f172a', minHeight: '100vh', color: '#f8fafc' },
   header: { backgroundColor: '#1e3a8a', padding: '15px 0' },
   headerContent: { maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px' },
-  logo: { fontSize: '24px', fontWeight: 'bold' },
-  nav: { display: 'flex', gap: '20px', flexWrap: 'wrap' },
-  navLink: { color: 'white', textDecoration: 'none', fontSize: '15px' },
-  navLinkActive: { color: '#60a5fa', textDecoration: 'none', fontSize: '15px', fontWeight: 'bold' },
+  logo: { fontSize: '24px', fontWeight: 'bold', color: '#60a5fa' },
+  nav: { display: 'flex', gap: '15px', flexWrap: 'wrap' },
+  navLink: { background: 'none', border: 'none', color: '#94a3b8', fontSize: '15px', cursor: 'pointer', padding: '8px 12px', transition: '0.2s' },
+  navLinkActive: { background: '#3b82f6', border: 'none', color: '#ffffff', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', padding: '8px 12px', borderRadius: '6px' },
   container: { maxWidth: '1200px', margin: '0 auto', padding: '20px' },
   hero: { background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', padding: '40px', borderRadius: '10px', textAlign: 'center', marginBottom: '30px' },
-
-  // Quick Actions Styles matching your HTML
   quickActionsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', margin: '20px 0 40px 0' },
   actionCard: { backgroundColor: '#1e293b', padding: '25px', borderRadius: '10px', textAlign: 'center', border: '1px solid #334155', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' },
   actionCardTitle: { color: '#60a5fa', marginBottom: '10px', fontSize: '18px' },
   actionCardText: { color: '#94a3b8', fontSize: '14px', marginBottom: '20px', flex: 1 },
-  actionBtn: { padding: '10px 20px', backgroundColor: '#1e3a8a', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', textDecoration: 'none', display: 'inline-block', fontWeight: 'bold', width: '100%' },
-
-  // News Styles matching your HTML
-  newsCard: { backgroundColor: '#1e293b', padding: '25px', borderRadius: '10px', border: '1px solid #334155', marginTop: '10px' },
-  newsTitle: { color: '#60a5fa', marginBottom: '10px' },
-  newsText: { color: '#94a3b8', marginBottom: '20px' },
-
+  actionBtn: { padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'inline-block', fontWeight: 'bold', width: '100%' },
+  actionBtnSecondary: { padding: '8px 16px', backgroundColor: '#334155', color: '#f8fafc', border: '1px solid #475569', borderRadius: '5px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', marginTop: '10px', width: 'fit-content' },
+  newsCard: { backgroundColor: '#1e293b', padding: '25px', borderRadius: '10px', border: '1px solid #334155', display: 'flex', flexDirection: 'column' },
+  newsTitle: { color: '#f8fafc', marginBottom: '10px', fontSize: '18px' },
+  newsText: { color: '#94a3b8', marginBottom: '8px', fontSize: '14px', lineHeight: '1.5' },
   marketHighlights: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' },
   highlightCard: { backgroundColor: '#1e293b', padding: '20px', borderRadius: '10px', textAlign: 'center', border: '1px solid #334155' },
   highlightHeader: { color: '#94a3b8', fontSize: '14px', marginBottom: '10px' },
@@ -464,9 +494,7 @@ const styles = {
   tableValue: { textAlign: 'right', fontWeight: 'bold', fontSize: '14px' },
   iconBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' },
   form: { width: '100%' },
-  filterBtn: { padding: '8px 16px', color: 'white', border: '1px solid #334155', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' },
-  pdfBtn: { padding: '10px 20px', backgroundColor: '#f43f5e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }
-
+  filterBtn: { padding: '8px 16px', color: 'white', border: '1px solid #334155', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' }
 };
 
 export default App;
