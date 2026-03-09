@@ -5,6 +5,7 @@ const FinancialRatio = require('../models/FinancialRatio');
 const AnalysisResult = require('../models/AnalysisResult');
 const authMiddleware = require('../middleware/authMiddleware');
 console.log('authMiddleware:', authMiddleware);
+const { body, validationResult } = require('express-validator');
 
 // GET all stocks (protected)
 router.get('/', authMiddleware, async (req, res) => {
