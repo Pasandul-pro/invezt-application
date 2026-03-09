@@ -7,6 +7,7 @@ const SummarizeNewsArticleInputSchema = z.object({
         .describe('The full text content of the news article to be summarized.'),
 });
 
+
 const SummarizeNewsArticleOutputSchema = z.object({
     summary: z.string().describe('A concise summary of the news article.'),
 });
