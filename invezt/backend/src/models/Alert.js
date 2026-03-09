@@ -1,4 +1,6 @@
+// Alert model
 const mongoose = require('mongoose');
+// Alert schema
 
 const alertSchema = new mongoose.Schema({
   userId: {
@@ -6,6 +8,7 @@ const alertSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  
   title: {
     type: String,
     required: true
@@ -19,6 +22,7 @@ const alertSchema = new mongoose.Schema({
     enum: ['Price Alert', 'Market Update', 'News Alert', 'Earnings Alert'],
     required: true
   },
+  // category of alert
   category: {
     type: String,
     enum: ['positive', 'negative', 'neutral'],
@@ -30,6 +34,7 @@ const alertSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  
   readAt: Date
 }, {
   timestamps: true

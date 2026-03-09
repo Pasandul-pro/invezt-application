@@ -6,7 +6,7 @@ import { newsRepository } from '../util/news.repository.js';
  */
 class NewsController {
     /**
-     * Handles news search request.
+     * Handles news search request using news api.
      */
     async searchNews(req, res) {
         try {
@@ -20,7 +20,7 @@ class NewsController {
     }
 
     /**
-     * Handles article summarization request.
+     * Handles article summarization request.using ai 
      */
     async summarizeArticle(req, res) {
         try {
@@ -40,4 +40,5 @@ class NewsController {
     }
 }
 
+// Export news controller
 export const newsController = new NewsController();

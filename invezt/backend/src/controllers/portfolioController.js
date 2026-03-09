@@ -3,6 +3,7 @@ const Transaction = require('../models/Transaction');
 
 
 // ADD TO WATCHLIST
+// Add stock to watchlist
 exports.addToWatchlist = async (req, res) => {
     try {
         const { userId, symbol } = req.body;
@@ -30,10 +31,12 @@ exports.addTransaction = async (req, res) => {
         const { userId, symbol, type, quantity, pricePerShare } = req.body;
         const totalValue = quantity * pricePerShare;
 
+        // Create a new transaction
         const newTransaction = new Transaction({
             userId, symbol, type, quantity, pricePerShare, totalValue
         });
 
+        // Save transaction to database
         await newTransaction.save();
         res.status(201).json(newTransaction);
     } catch (err) {
@@ -65,8 +68,10 @@ exports.removeFromWatchlist = async (req, res) => {
             // Filter out the stock symbol we want to remove
             watchlist.stocks = watchlist.stocks.filter(s => s.symbol !== symbol);
             await watchlist.save();
+            
         }
         res.status(200).json(watchlist);
+        // Remove stock from watchlist
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -96,8 +101,10 @@ exports.getPortfolioSummary = async (req, res) => {
             if (!summary[t.symbol]) summary[t.symbol] = 0;
             summary[t.symbol] += (t.type === 'BUY' ? t.quantity : -t.quantity);
         });
+        // Return portfolio summary
         res.status(200).json(summary);
     } catch (err) {
+        // Return error message
         res.status(500).json({ error: err.message });
     }
 };
