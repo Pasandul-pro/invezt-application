@@ -109,12 +109,22 @@ router.post('/:symbol/ratios', authMiddleware, [
     }
 
     // Step 2: Get the latest financial ratios for this stock
-    const ratios = await FinancialRatio.findOne({ stockId: stock._id })
-      .sort({ date: -1 });
+    const ratio = new FinancialRatio({
+      stockId: stock._id,
+      peRatio,
+      roe,
+      debtToEquity,
+      eps,
+      pbRatio,
+      currentRatio
+    });
+    await ratio.save();
 
-    if (!ratios) {
-      return res.status(404).json({ message: `No financial data found for "${symbol}".` });
-    }
+    res.status(201).json({ message: 'Financial ratios added successfully!', ratio });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
     // Step 3: Calculate star rating based on ratios
     const starRating = calculateStarRating(ratios);
