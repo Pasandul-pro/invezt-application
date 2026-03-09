@@ -61,7 +61,28 @@ router.post('/:symbol/ratios', authMiddleware, [
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
+try {
+    const { symbol } = req.params;
+    const { peRatio, roe, debtToEquity, eps, pbRatio, currentRatio } = req.body;
+    const stock = await Stock.findOne({ symbol: symbol.toUpperCase() });
+    if (!stock) {
+      return res.status(404).json({ message: `Stock "${symbol}" not found.` });
+    }
+    const ratio = new FinancialRatio({
+      stockId: stock._id,
+      peRatio,
+      roe,
+      debtToEquity,
+      eps,
+      pbRatio,
+      currentRatio
+    });
+    await ratio.save();
+    res.status(201).json({ message: 'Financial ratios added successfully!', ratio });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
            
   try {
     const { symbol } = req.params;
