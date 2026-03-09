@@ -1,5 +1,6 @@
 // BUGFIX FOR NODE 24 ON WINDOWS: Force reliable DNS servers
-require("node:dns/promises").setServers(["1.1.1.1", "8.8.8.8"]);
+import dns from 'node:dns/promises';
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 import express from 'express';
 import mongoose from 'mongoose';
@@ -10,7 +11,8 @@ import dotenv from 'dotenv';
 import authenticationMiddleware from './middlewares/authenticationMiddleware.js';
 import authenticationRoutes from './routes/authenticationRoutes.js';
 import stockRoutes from './routes/stockRoutes.js';
-import valuationRoutes from './routes/valuationRoutes.js'; // NEW: Import valuation routes
+import valuationRoutes from './routes/valuationRoutes.js';
+import portfolioRoutes from './routes/portfolioRoutes.js';
 
 dotenv.config();
 
@@ -25,7 +27,8 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authenticationRoutes);
 app.use('/api/stocks', authenticationMiddleware, stockRoutes);
-app.use('/api/valuation', authenticationMiddleware, valuationRoutes); // NEW: Valuation routes with auth
+app.use('/api/valuation', authenticationMiddleware, valuationRoutes);
+app.use('/api/portfolios', authenticationMiddleware, portfolioRoutes);
 
 // Health check
 app.get('/', (req, res) => {
@@ -35,7 +38,8 @@ app.get('/', (req, res) => {
         endpoints: {
             auth: "/api/auth",
             stocks: "/api/stocks",
-            valuation: "/api/valuation", // NEW: Added to health check
+            valuation: "/api/valuation",
+            portfolios: "/api/portfolios",
             marketHighlights: "/api/market-highlights",
             quote: "/api/quote/:ticker"
         }

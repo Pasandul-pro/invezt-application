@@ -1,5 +1,5 @@
 // models/Portfolio.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const portfolioHoldingSchema = new mongoose.Schema({
   companyTicker: {
@@ -128,7 +128,7 @@ const portfolioSchema = new mongoose.Schema({
     default: 'LKR',
     enum: ['LKR', 'USD', 'EUR', 'GBP']
   }
-}, { 
+}, {
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
@@ -156,10 +156,9 @@ portfolioSchema.methods.addOrUpdateHolding = function(holdingData) {
 
   if (existingHolding) {
     // Update existing holding (average cost calculation)
-    const totalCost = (existingHolding.shares * existingHolding.averageCost) + 
-                      (holdingData.shares * holdingData.averageCost);
+    const totalCost = (existingHolding.shares * existingHolding.averageCost) + (holdingData.shares * holdingData.averageCost);
     const totalShares = existingHolding.shares + holdingData.shares;
-    
+
     existingHolding.averageCost = totalCost / totalShares;
     existingHolding.shares = totalShares;
     existingHolding.notes = holdingData.notes || existingHolding.notes;
@@ -174,7 +173,7 @@ portfolioSchema.methods.addOrUpdateHolding = function(holdingData) {
 // Method to remove shares from holding
 portfolioSchema.methods.removeShares = function(ticker, sharesToRemove) {
   const holding = this.holdings.find(h => h.companyTicker === ticker);
-  
+
   if (!holding) {
     throw new Error('Holding not found');
   }
@@ -216,9 +215,7 @@ portfolioSchema.methods.calculateMetrics = function(currentPrices) {
   this.totalInvestment = totalInvestment;
   this.currentValue = currentValue;
   this.totalGainLoss = currentValue - totalInvestment;
-  this.totalGainLossPercent = totalInvestment > 0 
-    ? ((this.totalGainLoss / totalInvestment) * 100) 
-    : 0;
+  this.totalGainLossPercent = totalInvestment > 0 ? ((this.totalGainLoss / totalInvestment) * 100) : 0;
   this.lastUpdated = Date.now();
 
   return this.save();
@@ -227,7 +224,7 @@ portfolioSchema.methods.calculateMetrics = function(currentPrices) {
 // Static method to get portfolio summary by user
 portfolioSchema.statics.getPortfolioSummary = async function(userId) {
   const portfolios = await this.find({ userId, isActive: true });
-  
+
   const summary = {
     totalPortfolios: portfolios.length,
     totalInvestment: 0,
@@ -244,8 +241,7 @@ portfolioSchema.statics.getPortfolioSummary = async function(userId) {
   });
 
   if (summary.totalInvestment > 0) {
-    summary.totalGainLossPercent = 
-      (summary.totalGainLoss / summary.totalInvestment) * 100;
+    summary.totalGainLossPercent = (summary.totalGainLoss / summary.totalInvestment) * 100;
   }
 
   return summary;
@@ -259,4 +255,4 @@ portfolioSchema.pre('save', function(next) {
 
 const Portfolio = mongoose.model('Portfolio', portfolioSchema);
 
-module.exports = Portfolio;
+export default Portfolio;

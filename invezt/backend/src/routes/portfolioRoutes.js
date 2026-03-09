@@ -1,7 +1,7 @@
 // routes/portfolioRoutes.js
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
   getAllPortfolios,
   getPortfolioById,
   createPortfolio,
@@ -13,10 +13,10 @@ const {
   getTransactions,
   getPerformance,
   getPortfolioSummary
-} = require('../controllers/portfolioController');
+} from '../controllers/portfolioController.js';
 
 // Middleware to protect routes (assuming you have authentication middleware)
-const { protect } = require('../middleware/auth');
+import { protect } from '../middleware/auth.js';
 
 // Apply authentication to all routes
 router.use(protect);
@@ -45,4 +45,4 @@ router.get('/:id/transactions', getTransactions);
 // Performance analytics
 router.get('/:id/performance', getPerformance);
 
-module.exports = router;
+export default router;

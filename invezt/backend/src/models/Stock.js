@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // ============================================================================
 // STOCK DATABASE SCHEMA (NOW WITH PORTFOLIO TRACKING)
@@ -36,4 +36,4 @@ const stockSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Stock', stockSchema);
+export default mongoose.model('Stock', stockSchema);

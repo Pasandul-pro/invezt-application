@@ -1,6 +1,6 @@
-const Watchlist = require('../models/Watchlist');
+import Watchlist from '../models/Watchlist.js';
 
-exports.addToWatchlist = async (req, res) => {
+export const addToWatchlist = async (req, res) => {
     const { userId, symbol } = req.body;
     let watchlist = await Watchlist.findOne({ userId });
 
@@ -12,3 +12,5 @@ exports.addToWatchlist = async (req, res) => {
     await watchlist.save();
     res.json(watchlist);
 };
+
+export default { addToWatchlist };
