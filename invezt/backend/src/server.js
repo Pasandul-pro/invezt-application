@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import authenticationMiddleware from './middlewares/authenticationMiddleware.js';
 import authenticationRoutes from './routes/authenticationRoutes.js';
 import stockRoutes from './routes/stockRoutes.js';
+import valuationRoutes from './routes/valuationRoutes.js'; // NEW: Import valuation routes
 
 dotenv.config();
 const app = express();
@@ -20,13 +21,21 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
+// Routes
 app.use('/api/auth', authenticationRoutes);
 app.use('/api/stocks', authenticationMiddleware, stockRoutes);
+app.use('/api/valuation', authenticationMiddleware, valuationRoutes); // NEW: Valuation routes with auth
 
+// Health check
 app.get('/', (req, res) => {
     res.status(200).json({
         message: "invezt backend is running",
         status: "ok",
+        endpoints: {
+            auth: "/api/auth",
+            stocks: "/api/stocks",
+            valuation: "/api/valuation" // NEW: Added to health check
+        }
     });
 });
 
@@ -43,7 +52,8 @@ const startServer = async () => {
 
         app.listen(port, () => {
           console.log(`server runnning on http://localhost:${port}`);
-});
+          console.log(`📊 Valuation API: http://localhost:${port}/api/valuation`);
+        });
     } catch(err){
         console.error("failed to start server: ", err.message);
         process.exit(1);
