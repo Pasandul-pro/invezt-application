@@ -97,10 +97,10 @@ router.post('/:symbol/ratios', authMiddleware, [
     return res.status(400).json({ errors: errors.array() });
   }
 
-
            
   try {
     const { symbol } = req.params;
+    const { peRatio, roe, debtToEquity, eps, pbRatio, currentRatio } = req.body;
 
     // Step 1: Find the stock by symbol
     const stock = await Stock.findOne({ symbol: symbol.toUpperCase() });
