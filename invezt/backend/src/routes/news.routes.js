@@ -11,6 +11,7 @@ const router = express.Router();
  * @query   limit - Items per page (default: 10)
  */
 router.get('/', async (req, res) => {
+  // Get all news articles with pagination
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -22,6 +23,7 @@ router.get('/', async (req, res) => {
       .limit(limit);
 
     const total = await News.countDocuments();
+    // Return all news articles with pagination
 
     res.json({
       success: true,
@@ -39,6 +41,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+
 /**
  * @route   GET /api/news/featured
  * @desc    Get featured news articles
@@ -49,6 +52,7 @@ router.get('/featured', async (req, res) => {
     const news = await News.find({ isFeatured: true })
       .sort({ date: -1 })
       .limit(5);
+      // Return featured news articles
 
     res.json({
       success: true,
@@ -78,6 +82,7 @@ router.get('/category/:category', async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+      
     const total = await News.countDocuments({ category });
 
     res.json({
