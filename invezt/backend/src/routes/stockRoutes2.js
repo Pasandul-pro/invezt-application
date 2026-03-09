@@ -17,6 +17,7 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/stocks - Create a new stock
 router.post('/', authMiddleware, [
   body('symbol').notEmpty().withMessage('Symbol is required.'),
   body('companyName').notEmpty().withMessage('Company name is required.')
@@ -44,6 +45,7 @@ router.post('/', authMiddleware, [
   }
 });
 
+// POST /api/stocks/:symbol/ratios - Add financial ratios for a stock
 router.post('/:symbol/ratios', authMiddleware, [
   body('peRatio').notEmpty().isNumeric().withMessage('P/E Ratio is required and must be a number.'),
   body('roe').optional().isNumeric().withMessage('ROE must be a number.'),
@@ -79,23 +81,10 @@ try {
   }
 });
 
-router.post('/:symbol/ratios', authMiddleware, [
-  body('peRatio').notEmpty().isNumeric().withMessage('P/E Ratio is required and must be a number.'),
-  body('roe').optional().isNumeric().withMessage('ROE must be a number.'),
-  body('debtToEquity').optional().isNumeric().withMessage('Debt to Equity must be a number.'),
-  body('eps').optional().isNumeric().withMessage('EPS must be a number.'),
-  body('pbRatio').optional().isNumeric().withMessage('P/B Ratio must be a number.'),
-  body('currentRatio').optional().isNumeric().withMessage('Current Ratio must be a number.')
-], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-           
+// GET /api/stocks/:symbol/analysis (protected)
+router.get('/:symbol/analysis', authMiddleware, async (req, res) => {
   try {
     const { symbol } = req.params;
-    const { peRatio, roe, debtToEquity, eps, pbRatio, currentRatio } = req.body;
 
     // Step 1: Find the stock by symbol
     const stock = await Stock.findOne({ symbol: symbol.toUpperCase() });
@@ -104,22 +93,12 @@ router.post('/:symbol/ratios', authMiddleware, [
     }
 
     // Step 2: Get the latest financial ratios for this stock
-    const ratio = new FinancialRatio({
-      stockId: stock._id,
-      peRatio,
-      roe,
-      debtToEquity,
-      eps,
-      pbRatio,
-      currentRatio
-    });
-    await ratio.save();
+    const ratios = await FinancialRatio.findOne({ stockId: stock._id })
+      .sort({ date: -1 });
 
-    res.status(201).json({ message: 'Financial ratios added successfully!', ratio });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    if (!ratios) {
+      return res.status(404).json({ message: `No financial data found for "${symbol}".` });
+    }
 
     // Step 3: Calculate star rating based on ratios
     const starRating = calculateStarRating(ratios);
