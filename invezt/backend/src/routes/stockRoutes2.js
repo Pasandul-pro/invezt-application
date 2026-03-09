@@ -36,6 +36,18 @@ router.post('/', authMiddleware, [
     if (existing) {
       return res.status(400).json({ message: 'Stock already exists.' });
     }
+    const stock = new Stock({
+      symbol: symbol.toUpperCase(),
+      companyName,
+      sector,
+      marketCap
+    });
+    await stock.save();
+    res.status(201).json({ message: 'Stock created successfully!', stock });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
            
