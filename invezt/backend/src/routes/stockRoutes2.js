@@ -17,11 +17,6 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-// GET /api/stocks/:symbol/analysis (protected)
-router.get('/:symbol/analysis', authMiddleware, async (req, res) => {
-    }
-  });
-
 router.post('/', authMiddleware, [
   body('symbol').notEmpty().withMessage('Symbol is required.'),
   body('companyName').notEmpty().withMessage('Company name is required.')
