@@ -49,6 +49,18 @@ router.post('/', authMiddleware, [
   }
 });
 
+router.post('/:symbol/ratios', authMiddleware, [
+  body('peRatio').notEmpty().isNumeric().withMessage('P/E Ratio is required and must be a number.'),
+  body('roe').optional().isNumeric().withMessage('ROE must be a number.'),
+  body('debtToEquity').optional().isNumeric().withMessage('Debt to Equity must be a number.'),
+  body('eps').optional().isNumeric().withMessage('EPS must be a number.'),
+  body('pbRatio').optional().isNumeric().withMessage('P/B Ratio must be a number.'),
+  body('currentRatio').optional().isNumeric().withMessage('Current Ratio must be a number.')
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
            
   try {
