@@ -21,6 +21,10 @@ class NewsRepository {
     async fetchEverything(params) {
         const { apiKey: providedKey, ...queryParams } = params;
         const apiKey = providedKey || process.env.NEWS_API_KEY;
+
+        if (!apiKey) {
+            throw new Error("NewsAPI key is missing.");
+        }
     }
 }
 
