@@ -10,3 +10,9 @@ const SummarizeNewsArticleInputSchema = z.object({
 const SummarizeNewsArticleOutputSchema = z.object({
     summary: z.string().describe('A concise summary of the news article.'),
 });
+
+export const summarizeNewsArticlePrompt = ai.definePrompt({
+    name: 'summarizeNewsArticlePrompt',
+    input: { schema: SummarizeNewsArticleInputSchema },
+    output: { schema: SummarizeNewsArticleOutputSchema },
+    prompt: `Summarize the following news article concisely, focusing on its main points. The summary should be approximately 3-5 sentences long.
