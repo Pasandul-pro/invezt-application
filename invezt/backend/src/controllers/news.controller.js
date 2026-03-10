@@ -28,8 +28,11 @@ class NewsController {
             // Validation for content length
             if (!content || content.length < 50) {
                 return res.status(400).json({ error: "Content too short for AI analysis. Please provide at least 50 characters." });
-            }
-        
+            }  const summary = await summarizeNewsArticleFlow({ articleContent: content });
+            res.json(summary);
+        } catch (error) {
+            console.error('Summarization Error:', error);
+            res.status(500).json({ error: error.message });
+        }
     }
-
 }
