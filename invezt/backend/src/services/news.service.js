@@ -9,6 +9,10 @@ class NewsService {
      * @param {Object} params - Search parameters.
      * @returns {Promise<Object>}
      */
+    async searchNews(params) {
+        // Add business logic here if needed (e.g., validation, caching, formatting)
+        return newsRepository.fetchEverything(params);
+    }
 }
 
 export const newsService = new NewsService();
