@@ -11,6 +11,7 @@ class AiService {
      */
     async generateAiSummary(content) {
         if (!content || content.length < 50) {
+            throw new Error("Content too short for AI analysis.");
     }
 }
 
