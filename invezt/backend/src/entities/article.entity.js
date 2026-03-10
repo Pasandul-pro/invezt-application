@@ -12,5 +12,11 @@ class Article {
         this.publishedAt = data.publishedAt;
         this.content = data.content;
     }
+
+    /**
+     * Static method to create from raw API data.
+     */
+    static fromApi(data) {
+        return new Article(data);
     }
 }
