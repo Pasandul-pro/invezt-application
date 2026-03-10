@@ -16,3 +16,23 @@ export const summarizeNewsArticlePrompt = ai.definePrompt({
     input: { schema: SummarizeNewsArticleInputSchema },
     output: { schema: SummarizeNewsArticleOutputSchema },
     prompt: `Summarize the following news article concisely, focusing on its main points. The summary should be approximately 3-5 sentences long.
+
+Article:
+---
+{{{articleContent}}}
+---
+
+Summary:`,
+});
+
+export const summarizeNewsArticleFlow = ai.defineFlow(
+    {
+        name: 'summarizeNewsArticleFlow',
+        inputSchema: SummarizeNewsArticleInputSchema,
+        outputSchema: SummarizeNewsArticleOutputSchema,
+    },
+    async (input) => {
+        const { output } = await summarizeNewsArticlePrompt(input);
+        return output;
+    }
+);
