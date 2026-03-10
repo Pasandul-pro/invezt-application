@@ -33,7 +33,9 @@ class NewsRepository {
                     "X-Api-Key": apiKey
                 }
             });
+            return response.data;
         } catch (error) {
+            throw new Error(message);
         }
     }
 }
