@@ -1,0 +1,4 @@
+requests
+pymongo
+schedule
+requests==2.31.0

@@ -29,6 +29,7 @@ const authFile = new mongoose.Schema(
     { timestamps: true }
 );
 
+authFile.index({ lastAccess: -1 });
 const Authentication = mongoose.model('Authentication', authFile);
 export default Authentication;
 
