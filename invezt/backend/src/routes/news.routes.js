@@ -9,3 +9,7 @@ const router = express.Router();
  */
 router.get('/search', (req, res) => newsController.searchNews(req, res));
 
+/**
+ * @route POST /api/news/summarize
+ * @desc Generate AI summary for article content
+ */
