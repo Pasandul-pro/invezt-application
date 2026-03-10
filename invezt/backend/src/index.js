@@ -16,3 +16,7 @@ app.use(express.json());
 // Routes
 app.use('/api', routes);
 
+// Error Handling
+app.use(errorHandler);
+
+// Start server
