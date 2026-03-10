@@ -19,6 +19,8 @@ class NewsRepository {
      * @returns {Promise<Object>}
      */
     async fetchEverything(params) {
+        const { apiKey: providedKey, ...queryParams } = params;
+        const apiKey = providedKey || process.env.NEWS_API_KEY;
     }
 }
 
