@@ -7,3 +7,5 @@ const router = express.Router();
  * @route GET /api/news/search
  * @desc Search for news articles
  */
+router.get('/search', (req, res) => newsController.searchNews(req, res));
+
