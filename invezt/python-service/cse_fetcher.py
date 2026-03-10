@@ -21,7 +21,11 @@ def fetch_market_data():
 
     try:
 
-        response = requests.get(CSE_API, headers=headers)
+        response = requests.get(CSE_API,headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept": "application/json",
+        "Referer": "https://www.cse.lk/"},
+        timeout=10)
 
         if response.status_code != 200:
             print("Error fetching data")
