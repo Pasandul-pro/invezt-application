@@ -1,0 +1,127 @@
+
+> invezt@1.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m???[39m 7 modules transformed.
+node.exe : 
+[31mx[39m Build 
+failed in 748ms
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([31mx   
+ [39m Build faile    
+d in 748ms:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[31merror during 
+build:
+[31m[vite:esbuild] 
+Transform failed 
+with 1 error:
+D:/invezt-application
+/invezt/frontend/src/
+pages/Dashboard.jsx:3
+10:40: ERROR: 
+Expected "}" but 
+found "-"[31m
+file: [36mD:/invezt-
+application/invezt/fr
+ontend/src/pages/Dash
+board.jsx:310:40[31m
+[33m
+[33mExpected "}" 
+but found "-"[33m
+308|    grid: { 
+display: 'grid', 
+gridTemplateColumns: 
+'repeat(auto-fill, 
+minmax(300px, 
+1fr))', gap: '20px' 
+},
+309|    card: { 
+backgroundColor: 
+'#1e293b', padding: 
+'20px', 
+borderRadius: 
+'12px', border: '1px 
+solid #334155' },
+310|    cardHeader: 
+{ display: 'flex', 
+justify-content: 
+'space-between', 
+marginBottom: '10px' 
+},
+   |                 
+                     
+    ^
+311|    ticker: { 
+fontSize: '20px', 
+margin: 0, 
+fontWeight: 'bold' },
+312|    companyName: 
+{ color: '#94a3b8', 
+fontSize: '14px', 
+margin: '0 0 15px 0' 
+},
+[31m
+    at 
+failureErrorWithLog (
+D:\invezt-application
+\invezt\frontend\node
+_modules\esbuild\lib\
+main.js:1472:15)
+    at D:\invezt-appl
+ication\invezt\fronte
+nd\node_modules\esbui
+ld\lib\main.js:755:50
+    at responseCallba
+cks.<computed> (D:\in
+vezt-application\inve
+zt\frontend\node_modu
+les\esbuild\lib\main.
+js:622:9)
+    at 
+handleIncomingPacket 
+(D:\invezt-applicatio
+n\invezt\frontend\nod
+e_modules\esbuild\lib
+\main.js:677:12)
+    at Socket.readFro
+mStdout (D:\invezt-ap
+plication\invezt\fron
+tend\node_modules\esb
+uild\lib\main.js:600:
+7)
+    at Socket.emit 
+(node:events:508:28)
+    at addChunk (node
+:internal/streams/rea
+dable:559:12)
+    at readableAddChu
+nkPushByteMode (node:
+internal/streams/read
+able:510:3)
+    at Readable.push 
+(node:internal/stream
+s/readable:390:5)
+    at 
+Pipe.onStreamRead (no
+de:internal/stream_ba
+se_commons:189:23)[3
+9m
