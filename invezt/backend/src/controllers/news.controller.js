@@ -22,7 +22,13 @@ class NewsController {
      * Handles article summarization request.
      */
     async summarizeArticle(req, res) {
+        try {
+            const { content } = req.body;
 
+            // Validation for content length
+            if (!content || content.length < 50) {
+                return res.status(400).json({ error: "Content too short for AI analysis. Please provide at least 50 characters." });
+            }
         
     }
 
