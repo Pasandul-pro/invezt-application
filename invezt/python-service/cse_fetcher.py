@@ -27,6 +27,10 @@ def fetch_market_data():
         "Referer": "https://www.cse.lk/"},
         timeout=10)
 
+        # <<< Add debug logging here >>>
+        print("Status Code:", response.status_code)
+        print("Response Preview:", response.text[:200])  # shows first 200 characters
+
         if response.status_code != 200:
             print("Error fetching data")
             return
