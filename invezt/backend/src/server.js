@@ -1,5 +1,6 @@
 // BUGFIX FOR NODE 24 ON WINDOWS: Force reliable DNS servers
 require("node:dns/promises").setServers(["1.1.1.1", "8.8.8.8"]);
+import marketRoutes from "./routes/marketRoutes.js";
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -21,6 +22,7 @@ const realTimeStockService = require("./services/realTimeStockService");
 
 const app = express();
 
+app.use("/api/market", marketRoutes);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
