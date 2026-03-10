@@ -1,48 +1,32 @@
-// routes/portfolioRoutes.js
 const express = require('express');
 const router = express.Router();
 const {
-  getAllPortfolios,
-  getPortfolioById,
-  createPortfolio,
-  updatePortfolio,
-  deletePortfolio,
-  addHolding,
-  updateHolding,
-  removeHolding,
-  getTransactions,
-  getPerformance,
-  getPortfolioSummary
+    getPortfolios,
+    getPortfolio,
+    createPortfolio,
+    updatePortfolio,
+    deletePortfolio,
+    getPortfolioSummary,
+    refreshPrices
 } = require('../controllers/portfolioController');
 
-// Middleware to protect routes (assuming you have authentication middleware)
-const { protect } = require('../../src/middleware/auth');
+const { protect } = require('../../middleware/authMiddleware'); // Adjust path as needed
 
-// Apply authentication to all routes
+// All routes require authentication
 router.use(protect);
 
-// Portfolio CRUD routes
-router.route('/')
-  .get(getAllPortfolios)
-  .post(createPortfolio);
-
-// Portfolio summary
+// Summary route (must come before /:id)
 router.get('/summary', getPortfolioSummary);
+router.post('/refresh', refreshPrices);
+
+// CRUD routes
+router.route('/')
+    .get(getPortfolios)
+    .post(createPortfolio);
 
 router.route('/:id')
-  .get(getPortfolioById)
-  .put(updatePortfolio)
-  .delete(deletePortfolio);
-
-// Holdings management
-router.post('/:id/holdings', addHolding);
-router.put('/:id/holdings/:ticker', updateHolding);
-router.delete('/:id/holdings/:ticker', removeHolding);
-
-// Transactions
-router.get('/:id/transactions', getTransactions);
-
-// Performance analytics
-router.get('/:id/performance', getPerformance);
+    .get(getPortfolio)
+    .put(updatePortfolio)
+    .delete(deletePortfolio);
 
 module.exports = router;
