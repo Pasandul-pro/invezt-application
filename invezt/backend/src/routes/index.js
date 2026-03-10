@@ -7,3 +7,5 @@ router.use('/news', newsRoutes);
 
 // Health check
 router.get('/health', (req, res) => res.json({ status: 'UP' }));
+
+export default router;
