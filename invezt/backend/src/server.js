@@ -1,4 +1,8 @@
 // BUGFIX FOR NODE 24 ON WINDOWS: Force reliable DNS servers
+// After database connection is established
+// Add after other middleware
+app.use('/api/portfolio', require('./portfolio/routes/portfolioRoutes'));
+require('./portfolio/scheduler');
 require("node:dns/promises").setServers(["1.1.1.1", "8.8.8.8"]);
 import marketRoutes from "./routes/marketRoutes.js";
 
