@@ -1,6 +1,7 @@
 import express from "express";
 import { MongoClient } from "mongodb";
 
+
 const router = express.Router();
 const client = new MongoClient("mongodb://localhost:27017");
 
