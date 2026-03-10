@@ -27,6 +27,10 @@ class NewsRepository {
         }
 
         try {
+            const response = await axios.get(`${NEWS_API_URL}/everything`, {
+                params: queryParams,
+                headers: {
+                    "X-Api-Key": apiKey
                 }
             });
         } catch (error) {
