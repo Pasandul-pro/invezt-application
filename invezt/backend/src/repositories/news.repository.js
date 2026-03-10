@@ -35,6 +35,8 @@ class NewsRepository {
             });
             return response.data;
         } catch (error) {
+            console.error('NewsRepository.fetchEverything error:', error.response?.data || error.message);
+            const message = error.response?.data?.message || "Failed to fetch news articles";
             throw new Error(message);
         }
     }
