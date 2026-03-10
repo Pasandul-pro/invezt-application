@@ -9,6 +9,8 @@ class AiService {
      * @param {string} content - The content to summarize.
      * @returns {Promise<{summary: string}>}
      */
+    async generateAiSummary(content) {
+    }
 }
 
 export const aiService = new AiService();
