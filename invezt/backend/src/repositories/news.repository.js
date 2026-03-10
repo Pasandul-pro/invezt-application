@@ -25,6 +25,12 @@ class NewsRepository {
         if (!apiKey) {
             throw new Error("NewsAPI key is missing.");
         }
+
+        try {
+                }
+            });
+        } catch (error) {
+        }
     }
 }
 
