@@ -18,4 +18,8 @@ class NewsRepository {
      * @param {string} [params.apiKey] - API key.
      * @returns {Promise<Object>}
      */
+    async fetchEverything(params) {
+    }
 }
+
+export const newsRepository = new NewsRepository();
