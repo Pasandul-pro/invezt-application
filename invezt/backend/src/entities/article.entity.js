@@ -20,3 +20,5 @@ class Article {
         return new Article(data);
     }
 }
+
+export default Article;
