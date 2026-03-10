@@ -18,5 +18,12 @@ class NewsController {
             res.status(500).json({ error: error.message });
         }
     }
+    /**
+     * Handles article summarization request.
+     */
+    async summarizeArticle(req, res) {
+
+        
+    }
 
 }
