@@ -10,6 +10,7 @@ class AiService {
      * @returns {Promise<{summary: string}>}
      */
     async generateAiSummary(content) {
+        if (!content || content.length < 50) {
     }
 }
 
