@@ -29,4 +29,5 @@ async function getLatestPrices(stockList){
 };
 
 const list = Array.isArray(data) ? data: data?.data ?? data?.content ?? [];
+const out = new Map();
 
