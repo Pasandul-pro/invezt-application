@@ -44,5 +44,10 @@ for (const sym of symbols) {
 return out;
 }
 
+function computeRatios(fin, lastPrice, lastYearData){
+  const eps = safeDiv(fin.netProfit, fin.weightedAvgShares);
+  const pe = lastPrice != null && eps != null ? safeDiv(lastPrice, eps) : null;
+}
+
 
 
