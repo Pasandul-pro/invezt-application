@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const calculatedRatioSchema = new mongoose.Schema({
   stockId: {
@@ -8,32 +8,36 @@ const calculatedRatioSchema = new mongoose.Schema({
   },
   symbol: {
     type: String,
-    required: true
+    required: true,
+    uppercase: true
   },
   financialDocumentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'FinancialDocument'
+  },
+  calculationTimestamp: {
+    type: Date,
+    default: Date.now
   },
   period: {
     fiscalYear: Number,
     quarter: Number
   },
   ratios: {
-    pe: Number,           // Price to Earnings
-    pb: Number,           // Price to Book
-    roe: Number,          // Return on Equity (%)
-    roa: Number,          // Return on Assets (%)
-    debtToEquity: Number, // Debt to Equity
-    currentRatio: Number, // Current Ratio
-    quickRatio: Number,   // Quick Ratio
-    eps: Number,          // Earnings Per Share
-    dividendYield: Number,// Dividend Yield (%)
-    peg: Number           // PEG Ratio
-  },
-  calculationTimestamp: {
-    type: Date,
-    default: Date.now
+    pe: Number,
+    pb: Number,
+    roe: Number,
+    roa: Number,
+    debtToEquity: Number,
+    currentRatio: Number,
+    quickRatio: Number,
+    eps: Number,
+    dividendYield: Number,
+    peg: Number
   }
+}, {
+  timestamps: true
 });
 
-module.exports = mongoose.model('CalculatedRatio', calculatedRatioSchema);
+const CalculatedRatio = mongoose.model('CalculatedRatio', calculatedRatioSchema);
+export default CalculatedRatio;

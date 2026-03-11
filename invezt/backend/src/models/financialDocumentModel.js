@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const financialDocumentSchema = new mongoose.Schema({
   stockId: {
@@ -48,4 +48,5 @@ const financialDocumentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model('FinancialDocument', financialDocumentSchema);
+const FinancialDocument = mongoose.model('FinancialDocument', financialDocumentSchema);
+export default FinancialDocument;
