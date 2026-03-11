@@ -5,3 +5,4 @@ import { compareCompanies } from "../controllers/compareController.js";
 const router = express.Router();
 
 router.get("/", authenticationMiddleware, compareCompanies);
+export default router;
