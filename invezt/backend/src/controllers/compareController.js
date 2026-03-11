@@ -6,5 +6,6 @@ const cse_trade_summary_url = "https://www.cse.lk/api/tradeSummary";
 const openai = new OpenAI ({ apiKey: process.env.openai_secret_key });
 
 function divideValues (a, b){
+  const x = Number(a);
   
 }
