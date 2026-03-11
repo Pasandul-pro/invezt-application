@@ -1,9 +1,10 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const stockPriceSchema = new mongoose.Schema({
   symbol: {
     type: String,
     required: true,
+    uppercase: true,
     index: true
   },
   price: {
@@ -19,6 +20,9 @@ const stockPriceSchema = new mongoose.Schema({
     default: Date.now,
     index: true
   }
+}, {
+  timestamps: true
 });
 
-module.exports = mongoose.model('StockPrice', stockPriceSchema);
+const StockPrice = mongoose.model('StockPrice', stockPriceSchema);
+export default StockPrice;
