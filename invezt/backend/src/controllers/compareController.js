@@ -5,14 +5,14 @@ import Financials from "../models/financialDocumentModel.js";
 const cse_trade_summary_url = "https://www.cse.lk/api/tradeSummary";
 const openai = new OpenAI ({ apiKey: process.env.openai_secret_key });
 
-function divideValues (a, b){
+function safeDiv (a, b){
   const x = Number(a);
   const y = Number(b);
 
   if(!Number.isFinite(x) || !Number.isFinite(y) || y === 0) return null;
   return x/y;
 }
-const percentage = (x) => (x == null ? null : x * 100);
+const pct = (x) => (x == null ? null : x * 100);
 
 async function getLatestPrices(symbols){
   const {data} = await axios.post(
@@ -26,7 +26,7 @@ async function getLatestPrices(symbols){
         "Content-Type": "application/json",
       },
     }
-};
+);
 
 const list = Array.isArray(data) ? data: data?.data ?? data?.content ?? [];
 const out = new Map();
@@ -51,8 +51,8 @@ function computeRatios(fin, lastPrice, lastYearData){
   const earningsYield = pe != null ? safeDiv(1, pe) : null;
 
   let growthPct = null;
-  if (prevFinForPeg?.netProfit != null && prevFinForPeg?.weightedAvgShares != null) {
-    const prevEps = safeDiv(prevFinForPeg.netProfit, prevFinForPeg.weightedAvgShares);
+  if (lastYearData?.netProfit != null && lastYearData?.weightedAvgShares != null) {
+    const prevEps = safeDiv(lastYearData.netProfit, lastYearData.weightedAvgShares);
     if (prevEps != null && prevEps !== 0 && eps != null) {
       growthPct = ((eps - prevEps) / Math.abs(prevEps)) * 100;
     }
@@ -86,26 +86,26 @@ export async function compareCompanies(req, res) {
       .filter(Boolean)
       .slice(0, 3);
 
-    const periodType = String(req.query.periodType || "annual").toUpperCase();
+    const periodType = String(req.query.periodType || "ANNUAL").toUpperCase();
     const year = Number(req.query.year);
     const quarter = req.query.quarter != null ? Number(req.query.quarter) : null;
 
     if (symbols.length < 1)
       return res.status(400).json({ status: "error", message: "symbols required (1-3)" });
 
-    if (!["annual", "quarterly"].includes(periodType))
+    if (!["ANNUAL", "QUARTERLY"].includes(periodType))
       return res.status(400).json({
         status: "error",
-        message: "periodType must be annual or quarterly",
+        message: "periodType must be ANNUAL or QUARTERLY",
       });
 
     if (!Number.isFinite(year))
       return res.status(400).json({ status: "error", message: "year is required" });
 
-    if (periodType === "quarterly" && !Number.isFinite(quarter))
+    if (periodType === "QUARTERLY" && !Number.isFinite(quarter))
       return res.status(400).json({
         status: "error",
-        message: "quarter required for quarterly (1-4)",
+        message: "quarter required for QUARTERLY (1-4)",
       });
     let priceMap = new Map();
     try {
@@ -125,7 +125,7 @@ export async function compareCompanies(req, res) {
     const finMap = new Map(fins.map((f) => [f.symbol, f]));
 
     const prevQuery =
-      periodType === "annual"
+      periodType === "ANNUAL"
         ? { symbol: { $in: symbols }, periodType, fiscalYear: year - 1 }
         : quarter === 1
           ? { symbol: { $in: symbols }, periodType, fiscalYear: year - 1, fiscalQuarter: 4 }
@@ -169,6 +169,23 @@ export async function compareCompanies(req, res) {
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
       });
+
+       recommendation = aiResponse?.choices?.[0]?.message?.content || "No AI response.";
+    }
+
+    return res.json({
+      status: "success",
+      period: { periodType, year, quarter: periodType === "QUARTERLY" ? quarter : null },
+      companies,
+      recommendation,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      message: "compare failed",
+      error: err.message,
+    });
+  }
 }
 
 
