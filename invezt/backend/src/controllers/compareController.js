@@ -14,11 +14,12 @@ function divideValues (a, b){
 }
 const percentage = (x) => (x == null ? null : x * 100);
 
-async function getLatestPrices(symbols){
+async function getLatestPrices(stockList){
   const {data} = await axios.post(
     cse_trade_summary_url,
     {},
     {
-      
+      timeout: 15000,
+      headers: 
     }
 }
