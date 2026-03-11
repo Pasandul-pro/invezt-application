@@ -1,86 +1,73 @@
-const axios = require('axios');
-const FinancialDocument = require('../models/financialDocumentModel');
-const calculationService = require('./calculationService');
+import axios from 'axios';
+import FinancialDocument from '../models/financialDocumentModel.js';
+import calculationService from './calculationService.js';
 
 class CSEIntegrationService {
   constructor() {
     this.baseURL = 'https://www.cse.lk/api/';
+    this.client = axios.create({
+      baseURL: this.baseURL,
+      timeout: 15000,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'invezt-app',
+        'Accept': 'application/json'
+      }
+    });
   }
 
-  /**
-   * Start polling CSE for new announcements
-   */
+  // Poll for new financial announcements every 1 HOUR
   startPolling() {
-    console.log('🔄 Starting CSE polling every 5 minutes...');
-    
-    // Poll every 5 minutes
+    console.log('🔄 Starting CSE announcement polling every 1 hour...');
+    // Run immediately on start, then every 1 hour
+    this.checkForNewAnnouncements();
     setInterval(async () => {
       await this.checkForNewAnnouncements();
-    }, 5 * 60 * 1000); // 5 minutes
-    
-    // Also run immediately on startup
-    this.checkForNewAnnouncements();
+    }, 60 * 60 * 1000); // 1 hour
   }
 
-  /**
-   * Check for new financial announcements from CSE
-   */
   async checkForNewAnnouncements() {
     try {
-      // Call CSE API to get latest announcements
-      const response = await axios.post(this.baseURL + 'getFinancialAnnouncement');
-      
+      const response = await this.client.post('getFinancialAnnouncement');
       const announcements = response.data;
-      
-      if (!announcements || announcements.length === 0) {
-        return;
-      }
+      if (!announcements || announcements.length === 0) return;
 
-      console.log(`📢 Found ${announcements.length} announcements`);
-
-      // Process each announcement
+      console.log(`📢 Found ${announcements.length} CSE announcements`);
       for (const announcement of announcements) {
         await this.processAnnouncement(announcement);
       }
     } catch (error) {
-      console.error('Error checking CSE announcements:', error.message);
+      console.error('CSE announcement check failed:', error.message);
     }
   }
 
-  /**
-   * Process a single announcement
-   */
   async processAnnouncement(announcement) {
     try {
-      // Extract symbol from announcement
       const symbol = announcement.symbol || announcement.companyCode;
-      
       if (!symbol) return;
 
-      // Check if we already have this document
       const exists = await FinancialDocument.findOne({
-        symbol: symbol,
+        symbol,
         'period.periodEndDate': new Date(announcement.date)
       });
+      if (exists) return;
 
-      if (exists) {
-        return; // Already processed
+      console.log(`📄 New document for ${symbol}`);
+      let companyInfo = {};
+      try {
+        const params = new URLSearchParams();
+        params.append('symbol', symbol);
+        const infoRes = await this.client.post('companyInfoSummery', params);
+        companyInfo = infoRes.data || {};
+      } catch {
+        // Proceed with partial data if company info fetch fails
       }
 
-      console.log(`📄 New document detected for ${symbol}`);
+      const financialData = this.extractFinancialData(announcement, companyInfo);
 
-      // Get company info from CSE
-      const companyInfo = await axios.post(this.baseURL + 'companyInfoSummery', {
-        symbol: symbol
-      });
-
-      // Extract financial data (simplified - you'd parse actual numbers)
-      const financialData = this.extractFinancialData(announcement, companyInfo.data);
-
-      // Save to database
       const financialDoc = new FinancialDocument({
         stockId: announcement.stockId,
-        symbol: symbol,
+        symbol,
         documentType: this.getDocumentType(announcement),
         period: {
           fiscalYear: new Date().getFullYear(),
@@ -89,41 +76,32 @@ class CSEIntegrationService {
         },
         source: 'CSE',
         publishedDate: new Date(),
-        financialData: financialData
+        financialData
       });
 
       await financialDoc.save();
       console.log(`✅ Saved financial document for ${symbol}`);
-
-      // AUTOMATICALLY CALCULATE THE 10 RATIOS!
       await calculationService.calculateForStock(symbol);
-      console.log(`🧮 Calculated 10 ratios for ${symbol}`);
-
     } catch (error) {
-      console.error('Error processing announcement:', error.message);
+      console.error(`Error processing announcement for ${announcement?.symbol}:`, error.message);
     }
   }
 
-  /**
-   * Extract financial data from announcement
-   */
   extractFinancialData(announcement, companyInfo) {
-    // This is simplified - in reality you'd parse the actual document
-    // For now, we'll create sample data based on announcement type
     return {
-      revenue: announcement.revenue || 1000000,
-      netIncome: announcement.profit || 200000,
-      totalAssets: companyInfo?.totalAssets || 5000000,
-      totalLiabilities: companyInfo?.totalLiabilities || 2000000,
-      shareholdersEquity: companyInfo?.equity || 3000000,
-      currentAssets: companyInfo?.currentAssets || 2000000,
-      currentLiabilities: companyInfo?.currentLiabilities || 1000000,
-      inventory: announcement.inventory || 500000,
-      eps: announcement.eps || 10.5,
-      bookValuePerShare: companyInfo?.bookValue || 50,
-      dividendPerShare: announcement.dividend || 2,
-      totalDebt: companyInfo?.totalDebt || 1000000,
-      outstandingShares: companyInfo?.shares || 100000
+      revenue: announcement.revenue || 0,
+      netIncome: announcement.profit || 0,
+      totalAssets: companyInfo?.totalAssets || 0,
+      totalLiabilities: companyInfo?.totalLiabilities || 0,
+      shareholdersEquity: companyInfo?.equity || 0,
+      currentAssets: companyInfo?.currentAssets || 0,
+      currentLiabilities: companyInfo?.currentLiabilities || 0,
+      inventory: announcement.inventory || 0,
+      eps: announcement.eps || 0,
+      bookValuePerShare: companyInfo?.bookValue || 0,
+      dividendPerShare: announcement.dividend || 0,
+      totalDebt: companyInfo?.totalDebt || 0,
+      outstandingShares: companyInfo?.shares || 0
     };
   }
 
@@ -139,4 +117,4 @@ class CSEIntegrationService {
   }
 }
 
-module.exports = new CSEIntegrationService();
+export default new CSEIntegrationService();

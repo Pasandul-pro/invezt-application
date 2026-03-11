@@ -1,26 +1,20 @@
-const FinancialDocument = require('../models/financialDocumentModel');
-const CalculatedRatio = require('../models/calculatedRatioModel');
-const StockPrice = require('../models/stockPriceModel');
+import FinancialDocument from '../models/financialDocumentModel.js';
+import CalculatedRatio from '../models/calculatedRatioModel.js';
+import StockPrice from '../models/stockPriceModel.js';
 
 class CalculationService {
   
-  /**
-   * Calculate all 10 ratios for a stock
-   */
   async calculateForStock(symbol) {
     try {
-      // Get latest financial data
       const financialDoc = await FinancialDocument.findOne({ symbol })
         .sort({ 'period.periodEndDate': -1 });
       
       if (!financialDoc) return null;
 
-      // Get latest stock price
       const latestPrice = await StockPrice.findOne({ symbol })
         .sort({ timestamp: -1 });
       const currentPrice = latestPrice?.price || 0;
 
-      // Get previous data for growth calculation
       const prevDoc = await FinancialDocument.findOne({
         symbol,
         'period.fiscalYear': financialDoc.period.fiscalYear - 1
@@ -29,7 +23,6 @@ class CalculationService {
       const data = financialDoc.financialData;
       const prevData = prevDoc?.financialData;
 
-      // Calculate 10 ratios
       const ratios = {
         pe: this.calculatePE(currentPrice, data.eps),
         pb: this.calculatePB(currentPrice, data.bookValuePerShare),
@@ -43,7 +36,6 @@ class CalculationService {
         peg: this.calculatePEG(currentPrice, data.eps, this.calculateGrowth(data.eps, prevData?.eps))
       };
 
-      // Save to database
       const calculatedRatio = new CalculatedRatio({
         stockId: financialDoc.stockId,
         symbol: symbol,
@@ -113,9 +105,6 @@ class CalculationService {
     return Number(((current - previous) / previous * 100).toFixed(2));
   }
 
-  /**
-   * Get real-time ratios for frontend
-   */
   async getRealTimeRatios(symbol) {
     try {
       const latestRatios = await CalculatedRatio.findOne({ symbol })
@@ -134,7 +123,6 @@ class CalculationService {
         };
       }
 
-      // Update price-dependent ratios with latest price
       const financialDoc = await FinancialDocument.findById(latestRatios.financialDocumentId);
       
       let updatedRatios = { ...latestRatios.ratios };
@@ -161,4 +149,4 @@ class CalculationService {
   }
 }
 
-module.exports = new CalculationService();
+export default new CalculationService();
