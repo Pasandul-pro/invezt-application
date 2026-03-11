@@ -148,6 +148,13 @@ export async function compareCompanies(req, res) {
           message: "Financials not found in DB for this period",
         };
       }
+      return {
+        symbol,
+        lastPrice,
+        ratios: computeRatios(fin, lastPrice, prevFin),
+        missing: false,
+      };
+    });
     
 }
 
