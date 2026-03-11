@@ -7,5 +7,6 @@ const openai = new OpenAI ({ apiKey: process.env.openai_secret_key });
 
 function divideValues (a, b){
   const x = Number(a);
+  const y = Number(b);
   
 }
