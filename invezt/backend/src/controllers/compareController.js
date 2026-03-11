@@ -50,6 +50,12 @@ function computeRatios(fin, lastPrice, lastYearData){
 
   const earningsYield = pe != null ? safeDiv(1, pe) : null;
 
+  let growthPct = null;
+  if (prevFinForPeg?.netProfit != null && prevFinForPeg?.weightedAvgShares != null) {
+    const prevEps = safeDiv(prevFinForPeg.netProfit, prevFinForPeg.weightedAvgShares);
+    if (prevEps != null && prevEps !== 0 && eps != null) {
+      growthPct = ((eps - prevEps) / Math.abs(prevEps)) * 100;
+    }
 }
 
 
