@@ -123,6 +123,21 @@ export async function compareCompanies(req, res) {
 
     const fins = await Financials.find(finQuery).lean();
     const finMap = new Map(fins.map((f) => [f.symbol, f]));
+
+    const prevQuery =
+      periodType === "annual"
+        ? { symbol: { $in: symbols }, periodType, fiscalYear: year - 1 }
+        : quarter === 1
+          ? { symbol: { $in: symbols }, periodType, fiscalYear: year - 1, fiscalQuarter: 4 }
+          : { symbol: { $in: symbols }, periodType, fiscalYear: year, fiscalQuarter: quarter - 1 };
+
+    const prevFins = await Financials.find(prevQuery).lean();
+    const prevMap = new Map(prevFins.map((f) => [f.symbol, f]));
+
+    const companies = symbols.map((symbol) => {
+      const fin = finMap.get(symbol) || null;
+      const prevFin = prevMap.get(symbol) || null;
+      const lastPrice = priceMap.get(symbol) ?? null;
     
 }
 
