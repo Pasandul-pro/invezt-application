@@ -78,6 +78,38 @@ function computeRatios(fin, lastPrice, lastYearData){
   };
 }
 
+export async function compareCompanies(req, res) {
+  try {
+    const symbols = String(req.query.symbols || "")
+      .split(",")
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean)
+      .slice(0, 3);
+
+    const periodType = String(req.query.periodType || "annual").toUpperCase();
+    const year = Number(req.query.year);
+    const quarter = req.query.quarter != null ? Number(req.query.quarter) : null;
+
+    if (symbols.length < 1)
+      return res.status(400).json({ status: "error", message: "symbols required (1-3)" });
+
+    if (!["annual", "quarterly"].includes(periodType))
+      return res.status(400).json({
+        status: "error",
+        message: "periodType must be annual or quarterly",
+      });
+
+    if (!Number.isFinite(year))
+      return res.status(400).json({ status: "error", message: "year is required" });
+
+    if (periodType === "quarterly" && !Number.isFinite(quarter))
+      return res.status(400).json({
+        status: "error",
+        message: "quarter required for quarterly (1-4)",
+      });
+  }
+}
+
 
 
 
