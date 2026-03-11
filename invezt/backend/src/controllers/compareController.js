@@ -107,7 +107,14 @@ export async function compareCompanies(req, res) {
         status: "error",
         message: "quarter required for quarterly (1-4)",
       });
+    let priceMap = new Map();
+    try {
+      priceMap = await getLatestPrices(symbols);
+    } catch (e) {
+      console.warn("CSE price fetch failed:", e.message);
   }
+
+    
 }
 
 
