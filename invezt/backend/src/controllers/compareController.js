@@ -61,6 +61,23 @@ function computeRatios(fin, lastPrice, lastYearData){
   const peg =
     pe != null && growthPct != null && growthPct !== 0 ? safeDiv(pe, growthPct) : null;
 
+  return {
+    roePercent: pct(safeDiv(fin.netProfit, fin.totalEquity)),
+    roaPercent: pct(safeDiv(fin.netProfit, fin.totalAssets)),
+    eps,
+    pe,
+    earningsYieldPercent: pct(earningsYield),
+    debtToEquity: safeDiv(fin.totalLiabilities, fin.totalEquity),
+    currentRatio: safeDiv(fin.currentAssets, fin.currentLiabilities),
+    quickRatio: safeDiv(
+      fin.currentAssets != null && fin.inventory != null ? fin.currentAssets - fin.inventory : null,
+      fin.currentLiabilities
+    ),
+    grossProfitMarginPercent: pct(safeDiv(fin.grossProfit, fin.revenue)),
+    peg,
+  };
+}
+
 
 
 
