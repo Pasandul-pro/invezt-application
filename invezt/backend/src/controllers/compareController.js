@@ -164,6 +164,11 @@ export async function compareCompanies(req, res) {
         "Given these companies and their financial ratios, recommend the best one to invest in and why. " +
         "Keep it brief and clear.\n\n" +
         `Companies data: ${JSON.stringify(companies)}`;
+
+       const aiResponse = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+      });
 }
 
 
