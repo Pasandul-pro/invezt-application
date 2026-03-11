@@ -114,6 +114,15 @@ export async function compareCompanies(req, res) {
       console.warn("CSE price fetch failed:", e.message);
   }
 
+    const finQuery = {
+      symbol: { $in: symbols },
+      periodType,
+      fiscalYear: year,
+      ...(periodType === "QUARTERLY" ? { fiscalQuarter: quarter } : {}),
+    };
+
+    const fins = await Financials.find(finQuery).lean();
+    const finMap = new Map(fins.map((f) => [f.symbol, f]));
     
 }
 
