@@ -38,5 +38,9 @@ for (const sym of symbols) {
   );
   const lastTradedPrice =
     row?.lastTradedPrice ?? row?.lastPrice ?? row?.price ?? null;
+
+  out.set(symbol, lastTradedPrice == null ? null : Number(lastTradedPrice));
+  }
+
 }
 
