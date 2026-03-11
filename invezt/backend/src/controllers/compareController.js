@@ -20,6 +20,10 @@ async function getLatestPrices(stockList){
     {},
     {
       timeout: 15000,
-      headers: 
+      headers: {
+        "User-Agent": "invezt",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
     }
-}
+};
