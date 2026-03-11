@@ -1,651 +1,315 @@
-// controllers/portfolioController.js
-const Portfolio = require('../models/Portfolio');
-const axios = require('axios');
+import Portfolio from '../models/Portfolio.js';
+import realTimeStockService from '../services/realTimeStockService.js';
 
 /**
- * Helper function to fetch current stock prices
- * Replace with actual CSE API or data source
+ * Fetch current stock prices from CSE live API for a list of tickers.
  */
 const fetchCurrentPrices = async (tickers) => {
+  const prices = {};
+  if (!tickers || tickers.length === 0) return prices;
   try {
-    // Mock implementation - replace with actual API call
-    const prices = {};
     for (const ticker of tickers) {
-      // Simulated API call
-      prices[ticker] = Math.random() * 200 + 50; // Random price between 50-250
+      const price = await realTimeStockService.getPriceForSymbol(ticker);
+      prices[ticker] = price;
     }
-    return prices;
   } catch (error) {
-    console.error('Error fetching stock prices:', error);
-    return {};
+    console.error('Error fetching stock prices:', error.message);
   }
+  return prices;
 };
 
 /**
- * Get all portfolios for a user
- * GET /api/portfolios
+ * GET /api/portfolio
  */
-exports.getAllPortfolios = async (req, res) => {
+export const getAllPortfolios = async (req, res) => {
   try {
-    const portfolios = await Portfolio.find({ 
-      userId: req.user.id,
-      isActive: true 
-    }).sort({ createdAt: -1 });
+    const portfolios = await Portfolio.find({ userId: req.user._id }).sort({ createdAt: -1 });
 
-    // Fetch current prices for all holdings
     const allTickers = new Set();
-    portfolios.forEach(portfolio => {
-      portfolio.holdings.forEach(holding => {
-        allTickers.add(holding.companyTicker);
-      });
-    });
-
+    portfolios.forEach(p => p.holdings.forEach(h => allTickers.add(h.companyTicker)));
     const currentPrices = await fetchCurrentPrices(Array.from(allTickers));
 
-    // Update portfolio metrics
-    for (const portfolio of portfolios) {
-      await portfolio.calculateMetrics(currentPrices);
-    }
-
-    res.status(200).json({
-      success: true,
-      count: portfolios.length,
-      data: portfolios
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching portfolios',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Get a single portfolio by ID
- * GET /api/portfolios/:id
- */
-exports.getPortfolioById = async (req, res) => {
-  try {
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
-
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
+    const enrichedPortfolios = portfolios.map(portfolio => {
+      const holdings = portfolio.holdings.map(h => {
+        const currentPrice = currentPrices[h.companyTicker] ?? h.averageCost;
+        const currentValue = h.shares * currentPrice;
+        const totalCost = h.shares * h.averageCost;
+        const gainLoss = currentValue - totalCost;
+        const gainLossPercent = totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
+        return {
+          ...h.toObject(),
+          currentPrice,
+          currentValue: parseFloat(currentValue.toFixed(2)),
+          totalCost: parseFloat(totalCost.toFixed(2)),
+          gainLoss: parseFloat(gainLoss.toFixed(2)),
+          gainLossPercent: parseFloat(gainLossPercent.toFixed(2))
+        };
       });
-    }
 
-    // Fetch current prices
-    const tickers = portfolio.holdings.map(h => h.companyTicker);
-    const currentPrices = await fetchCurrentPrices(tickers);
-
-    // Calculate and attach current prices to holdings
-    const enrichedHoldings = portfolio.holdings.map(holding => {
-      const currentPrice = currentPrices[holding.companyTicker] || holding.averageCost;
-      const currentValue = holding.shares * currentPrice;
-      const totalCost = holding.shares * holding.averageCost;
-      const gainLoss = currentValue - totalCost;
-      const gainLossPercent = (gainLoss / totalCost) * 100;
+      const totalValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
+      const totalInvestment = holdings.reduce((sum, h) => sum + h.totalCost, 0);
 
       return {
-        ...holding.toObject(),
-        currentPrice,
-        currentValue,
-        totalCost,
-        gainLoss,
-        gainLossPercent: gainLossPercent.toFixed(2),
-        isProfit: gainLoss >= 0
+        ...portfolio.toObject(),
+        holdings,
+        totalValue: parseFloat(totalValue.toFixed(2)),
+        totalInvestment: parseFloat(totalInvestment.toFixed(2)),
+        totalGainLoss: parseFloat((totalValue - totalInvestment).toFixed(2)),
+        totalGainLossPercent: totalInvestment > 0
+          ? parseFloat(((totalValue - totalInvestment) / totalInvestment * 100).toFixed(2))
+          : 0
       };
     });
 
-    // Update portfolio metrics
-    await portfolio.calculateMetrics(currentPrices);
+    res.status(200).json({ success: true, count: portfolios.length, data: enrichedPortfolios });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching portfolios', error: error.message });
+  }
+};
+
+/**
+ * GET /api/portfolio/:id
+ */
+export const getPortfolioById = async (req, res) => {
+  try {
+    const portfolio = await Portfolio.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!portfolio) return res.status(404).json({ success: false, message: 'Portfolio not found' });
+
+    const tickers = portfolio.holdings.map(h => h.companyTicker);
+    const currentPrices = await fetchCurrentPrices(tickers);
+
+    const holdings = portfolio.holdings.map(h => {
+      const currentPrice = currentPrices[h.companyTicker] ?? h.averageCost;
+      const currentValue = h.shares * currentPrice;
+      const totalCost = h.shares * h.averageCost;
+      const gainLoss = currentValue - totalCost;
+      const gainLossPercent = totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
+      return {
+        ...h.toObject(),
+        currentPrice,
+        currentValue: parseFloat(currentValue.toFixed(2)),
+        totalCost: parseFloat(totalCost.toFixed(2)),
+        gainLoss: parseFloat(gainLoss.toFixed(2)),
+        gainLossPercent: parseFloat(gainLossPercent.toFixed(2))
+      };
+    });
+
+    const totalValue = holdings.reduce((sum, h) => sum + h.currentValue, 0);
+    const totalInvestment = holdings.reduce((sum, h) => sum + h.totalCost, 0);
 
     res.status(200).json({
       success: true,
       data: {
         ...portfolio.toObject(),
-        holdings: enrichedHoldings
+        holdings,
+        totalValue: parseFloat(totalValue.toFixed(2)),
+        totalInvestment: parseFloat(totalInvestment.toFixed(2)),
+        totalGainLoss: parseFloat((totalValue - totalInvestment).toFixed(2)),
+        totalGainLossPercent: totalInvestment > 0
+          ? parseFloat(((totalValue - totalInvestment) / totalInvestment * 100).toFixed(2))
+          : 0
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching portfolio',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error fetching portfolio', error: error.message });
   }
 };
 
 /**
- * Create a new portfolio
- * POST /api/portfolios
+ * POST /api/portfolio
  */
-exports.createPortfolio = async (req, res) => {
+export const createPortfolio = async (req, res) => {
   try {
-    const { name, holdings, currency } = req.body;
-
+    const { name, holdings } = req.body;
     const portfolio = new Portfolio({
-      userId: req.user.id,
+      userId: req.user._id,
       name: name || 'My Portfolio',
-      holdings: holdings || [],
-      currency: currency || 'LKR'
+      holdings: holdings || []
     });
-
     await portfolio.save();
-
-    // Calculate initial metrics if holdings exist
-    if (holdings && holdings.length > 0) {
-      const tickers = holdings.map(h => h.companyTicker);
-      const currentPrices = await fetchCurrentPrices(tickers);
-      await portfolio.calculateMetrics(currentPrices);
-    }
-
-    res.status(201).json({
-      success: true,
-      message: 'Portfolio created successfully',
-      data: portfolio
-    });
+    res.status(201).json({ success: true, message: 'Portfolio created', data: portfolio });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error creating portfolio',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error creating portfolio', error: error.message });
   }
 };
 
 /**
- * Update portfolio details
- * PUT /api/portfolios/:id
+ * PUT /api/portfolio/:id
  */
-exports.updatePortfolio = async (req, res) => {
+export const updatePortfolio = async (req, res) => {
   try {
-    const { name, currency } = req.body;
-
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
-
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
-      });
-    }
+    const { name } = req.body;
+    const portfolio = await Portfolio.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!portfolio) return res.status(404).json({ success: false, message: 'Portfolio not found' });
 
     if (name) portfolio.name = name;
-    if (currency) portfolio.currency = currency;
-
+    portfolio.lastUpdated = Date.now();
     await portfolio.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Portfolio updated successfully',
-      data: portfolio
-    });
+    res.status(200).json({ success: true, message: 'Portfolio updated', data: portfolio });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error updating portfolio',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error updating portfolio', error: error.message });
   }
 };
 
 /**
- * Delete portfolio (soft delete)
- * DELETE /api/portfolios/:id
+ * DELETE /api/portfolio/:id
  */
-exports.deletePortfolio = async (req, res) => {
+export const deletePortfolio = async (req, res) => {
   try {
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
-
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
-      });
-    }
-
-    portfolio.isActive = false;
-    await portfolio.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Portfolio deleted successfully'
-    });
+    const portfolio = await Portfolio.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
+    if (!portfolio) return res.status(404).json({ success: false, message: 'Portfolio not found' });
+    res.status(200).json({ success: true, message: 'Portfolio deleted' });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting portfolio',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error deleting portfolio', error: error.message });
   }
 };
 
 /**
- * Add holding to portfolio
- * POST /api/portfolios/:id/holdings
+ * POST /api/portfolio/:id/holdings
  */
-exports.addHolding = async (req, res) => {
+export const addHolding = async (req, res) => {
   try {
-    const { companyTicker, companyName, shares, averageCost, purchaseDate, sector, notes } = req.body;
+    const { companyTicker, companyName, shares, averageCost, purchaseDate } = req.body;
 
-    // Validation
     if (!companyTicker || !companyName || !shares || !averageCost) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: companyTicker, companyName, shares, averageCost'
+        message: 'Required: companyTicker, companyName, shares, averageCost'
       });
     }
 
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
+    const portfolio = await Portfolio.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!portfolio) return res.status(404).json({ success: false, message: 'Portfolio not found' });
 
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
+    const ticker = companyTicker.toUpperCase().trim();
+    const existingHolding = portfolio.holdings.find(h => h.companyTicker === ticker);
+
+    if (existingHolding) {
+      // Average down/up the cost
+      const totalShares = existingHolding.shares + Number(shares);
+      const totalCost = (existingHolding.shares * existingHolding.averageCost) + (Number(shares) * Number(averageCost));
+      existingHolding.averageCost = parseFloat((totalCost / totalShares).toFixed(4));
+      existingHolding.shares = totalShares;
+    } else {
+      portfolio.holdings.push({
+        companyTicker: ticker,
+        companyName,
+        shares: Number(shares),
+        averageCost: Number(averageCost),
+        purchaseDate: purchaseDate ? new Date(purchaseDate) : Date.now()
       });
     }
 
-    // Add holding
-    await portfolio.addOrUpdateHolding({
-      companyTicker: companyTicker.toUpperCase(),
-      companyName,
-      shares: Number(shares),
-      averageCost: Number(averageCost),
-      purchaseDate: purchaseDate || Date.now(),
-      sector: sector || 'Unknown',
-      notes: notes || ''
-    });
+    portfolio.lastUpdated = Date.now();
+    await portfolio.save();
 
-    // Add transaction record
-    await portfolio.addTransaction({
-      type: 'BUY',
-      companyTicker: companyTicker.toUpperCase(),
-      companyName,
-      shares: Number(shares),
-      pricePerShare: Number(averageCost),
-      totalAmount: Number(shares) * Number(averageCost),
-      transactionDate: purchaseDate || Date.now(),
-      fees: 0,
-      notes: notes || ''
-    });
-
-    // Recalculate metrics
-    const tickers = portfolio.holdings.map(h => h.companyTicker);
-    const currentPrices = await fetchCurrentPrices(tickers);
-    await portfolio.calculateMetrics(currentPrices);
-
-    res.status(200).json({
-      success: true,
-      message: 'Holding added successfully',
-      data: portfolio
-    });
+    res.status(200).json({ success: true, message: 'Holding added', data: portfolio });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error adding holding',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error adding holding', error: error.message });
   }
 };
 
 /**
- * Update holding in portfolio
- * PUT /api/portfolios/:id/holdings/:ticker
+ * PUT /api/portfolio/:id/holdings/:ticker
  */
-exports.updateHolding = async (req, res) => {
+export const updateHolding = async (req, res) => {
   try {
     const { ticker } = req.params;
-    const { shares, averageCost, notes } = req.body;
+    const { shares, averageCost } = req.body;
 
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
+    const portfolio = await Portfolio.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!portfolio) return res.status(404).json({ success: false, message: 'Portfolio not found' });
 
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
-      });
-    }
-
-    const holding = portfolio.holdings.find(
-      h => h.companyTicker === ticker.toUpperCase()
-    );
-
-    if (!holding) {
-      return res.status(404).json({
-        success: false,
-        message: 'Holding not found'
-      });
-    }
+    const holding = portfolio.holdings.find(h => h.companyTicker === ticker.toUpperCase());
+    if (!holding) return res.status(404).json({ success: false, message: 'Holding not found' });
 
     if (shares !== undefined) holding.shares = Number(shares);
     if (averageCost !== undefined) holding.averageCost = Number(averageCost);
-    if (notes !== undefined) holding.notes = notes;
 
+    portfolio.lastUpdated = Date.now();
     await portfolio.save();
 
-    // Recalculate metrics
-    const tickers = portfolio.holdings.map(h => h.companyTicker);
-    const currentPrices = await fetchCurrentPrices(tickers);
-    await portfolio.calculateMetrics(currentPrices);
-
-    res.status(200).json({
-      success: true,
-      message: 'Holding updated successfully',
-      data: portfolio
-    });
+    res.status(200).json({ success: true, message: 'Holding updated', data: portfolio });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error updating holding',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error updating holding', error: error.message });
   }
 };
 
 /**
- * Remove holding from portfolio
- * DELETE /api/portfolios/:id/holdings/:ticker
+ * DELETE /api/portfolio/:id/holdings/:ticker
  */
-exports.removeHolding = async (req, res) => {
+export const removeHolding = async (req, res) => {
   try {
     const { ticker } = req.params;
-    const { sharesToRemove } = req.body;
 
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
+    const portfolio = await Portfolio.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!portfolio) return res.status(404).json({ success: false, message: 'Portfolio not found' });
 
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
-      });
+    const initialCount = portfolio.holdings.length;
+    portfolio.holdings = portfolio.holdings.filter(h => h.companyTicker !== ticker.toUpperCase());
+
+    if (portfolio.holdings.length === initialCount) {
+      return res.status(404).json({ success: false, message: 'Holding not found' });
     }
 
-    const holding = portfolio.holdings.find(
-      h => h.companyTicker === ticker.toUpperCase()
-    );
+    portfolio.lastUpdated = Date.now();
+    await portfolio.save();
 
-    if (!holding) {
-      return res.status(404).json({
-        success: false,
-        message: 'Holding not found'
-      });
-    }
-
-    const shares = sharesToRemove || holding.shares;
-
-    // Add sell transaction
-    const currentPrices = await fetchCurrentPrices([ticker]);
-    const sellPrice = currentPrices[ticker.toUpperCase()] || holding.averageCost;
-
-    await portfolio.addTransaction({
-      type: 'SELL',
-      companyTicker: ticker.toUpperCase(),
-      companyName: holding.companyName,
-      shares: Number(shares),
-      pricePerShare: sellPrice,
-      totalAmount: Number(shares) * sellPrice,
-      transactionDate: Date.now(),
-      fees: 0,
-      notes: 'Sold shares'
-    });
-
-    // Remove shares
-    await portfolio.removeShares(ticker.toUpperCase(), Number(shares));
-
-    // Recalculate metrics
-    const tickers = portfolio.holdings.map(h => h.companyTicker);
-    const updatedPrices = await fetchCurrentPrices(tickers);
-    await portfolio.calculateMetrics(updatedPrices);
-
-    res.status(200).json({
-      success: true,
-      message: 'Holding removed successfully',
-      data: portfolio
-    });
+    res.status(200).json({ success: true, message: 'Holding removed', data: portfolio });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error removing holding',
-      error: error.message
-    });
+    res.status(400).json({ success: false, message: 'Error removing holding', error: error.message });
   }
 };
 
 /**
- * Get portfolio transactions
- * GET /api/portfolios/:id/transactions
+ * GET /api/portfolio/:id/performance
  */
-exports.getTransactions = async (req, res) => {
+export const getPerformance = async (req, res) => {
   try {
-    const { page = 1, limit = 20, type, ticker } = req.query;
+    const portfolio = await Portfolio.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!portfolio) return res.status(404).json({ success: false, message: 'Portfolio not found' });
 
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
-
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
-      });
-    }
-
-    let transactions = portfolio.transactions;
-
-    // Filter by type
-    if (type) {
-      transactions = transactions.filter(t => t.type === type.toUpperCase());
-    }
-
-    // Filter by ticker
-    if (ticker) {
-      transactions = transactions.filter(
-        t => t.companyTicker === ticker.toUpperCase()
-      );
-    }
-
-    // Sort by date (newest first)
-    transactions.sort((a, b) => b.transactionDate - a.transactionDate);
-
-    // Pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    const paginatedTransactions = transactions.slice(startIndex, endIndex);
-
-    res.status(200).json({
-      success: true,
-      count: paginatedTransactions.length,
-      total: transactions.length,
-      page: Number(page),
-      pages: Math.ceil(transactions.length / limit),
-      data: paginatedTransactions
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching transactions',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Get portfolio performance over time
- * GET /api/portfolios/:id/performance
- */
-exports.getPerformance = async (req, res) => {
-  try {
-    const { period = '1M' } = req.query; // 1W, 1M, 3M, 6M, 1Y, ALL
-
-    const portfolio = await Portfolio.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    });
-
-    if (!portfolio) {
-      return res.status(404).json({
-        success: false,
-        message: 'Portfolio not found'
-      });
-    }
-
-    // Calculate date range
-    const endDate = new Date();
-    let startDate = new Date();
-
-    switch(period) {
-      case '1W':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case '1M':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case '3M':
-        startDate.setMonth(startDate.getMonth() - 3);
-        break;
-      case '6M':
-        startDate.setMonth(startDate.getMonth() - 6);
-        break;
-      case '1Y':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
-      case 'ALL':
-        startDate = new Date(portfolio.createdAt);
-        break;
-      default:
-        startDate.setMonth(startDate.getMonth() - 1);
-    }
-
-    // Filter transactions within date range
-    const relevantTransactions = portfolio.transactions.filter(
-      t => t.transactionDate >= startDate && t.transactionDate <= endDate
-    );
-
-    // Calculate performance metrics
-    const performanceData = {
-      period,
-      startDate,
-      endDate,
-      totalTransactions: relevantTransactions.length,
-      buyTransactions: relevantTransactions.filter(t => t.type === 'BUY').length,
-      sellTransactions: relevantTransactions.filter(t => t.type === 'SELL').length,
-      currentValue: portfolio.currentValue,
-      totalInvestment: portfolio.totalInvestment,
-      totalGainLoss: portfolio.totalGainLoss,
-      totalGainLossPercent: portfolio.totalGainLossPercent,
-      bestPerforming: null,
-      worstPerforming: null
-    };
-
-    // Get current prices for all holdings
     const tickers = portfolio.holdings.map(h => h.companyTicker);
     const currentPrices = await fetchCurrentPrices(tickers);
 
-    // Calculate individual holding performance
-    const holdingsPerformance = portfolio.holdings.map(holding => {
-      const currentPrice = currentPrices[holding.companyTicker] || holding.averageCost;
-      const currentValue = holding.shares * currentPrice;
-      const totalCost = holding.shares * holding.averageCost;
+    const holdingsPerformance = portfolio.holdings.map(h => {
+      const currentPrice = currentPrices[h.companyTicker] ?? h.averageCost;
+      const currentValue = h.shares * currentPrice;
+      const totalCost = h.shares * h.averageCost;
       const gainLoss = currentValue - totalCost;
-      const gainLossPercent = (gainLoss / totalCost) * 100;
-
+      const gainLossPercent = totalCost > 0 ? (gainLoss / totalCost) * 100 : 0;
       return {
-        ticker: holding.companyTicker,
-        name: holding.companyName,
-        gainLossPercent: gainLossPercent.toFixed(2),
-        gainLoss
+        ticker: h.companyTicker,
+        name: h.companyName,
+        shares: h.shares,
+        averageCost: h.averageCost,
+        currentPrice,
+        currentValue: parseFloat(currentValue.toFixed(2)),
+        gainLoss: parseFloat(gainLoss.toFixed(2)),
+        gainLossPercent: parseFloat(gainLossPercent.toFixed(2))
       };
     }).sort((a, b) => b.gainLossPercent - a.gainLossPercent);
 
-    if (holdingsPerformance.length > 0) {
-      performanceData.bestPerforming = holdingsPerformance[0];
-      performanceData.worstPerforming = holdingsPerformance[holdingsPerformance.length - 1];
-    }
+    const totalValue = holdingsPerformance.reduce((s, h) => s + h.currentValue, 0);
+    const totalInvestment = holdingsPerformance.reduce((s, h) => s + h.shares * h.averageCost, 0);
 
     res.status(200).json({
       success: true,
-      data: performanceData
+      data: {
+        portfolioName: portfolio.name,
+        totalValue: parseFloat(totalValue.toFixed(2)),
+        totalInvestment: parseFloat(totalInvestment.toFixed(2)),
+        totalGainLoss: parseFloat((totalValue - totalInvestment).toFixed(2)),
+        totalGainLossPercent: totalInvestment > 0
+          ? parseFloat(((totalValue - totalInvestment) / totalInvestment * 100).toFixed(2))
+          : 0,
+        bestPerforming: holdingsPerformance[0] || null,
+        worstPerforming: holdingsPerformance[holdingsPerformance.length - 1] || null,
+        holdings: holdingsPerformance
+      }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching performance data',
-      error: error.message
-    });
-  }
-};
-
-/**
- * Get portfolio summary/dashboard
- * GET /api/portfolios/summary
- */
-exports.getPortfolioSummary = async (req, res) => {
-  try {
-    const summary = await Portfolio.getPortfolioSummary(req.user.id);
-
-    // Get all active portfolios
-    const portfolios = await Portfolio.find({ 
-      userId: req.user.id,
-      isActive: true 
-    });
-
-    // Aggregate all holdings
-    const allHoldings = [];
-    const sectorAllocation = {};
-
-    portfolios.forEach(portfolio => {
-      portfolio.holdings.forEach(holding => {
-        allHoldings.push(holding);
-        
-        if (sectorAllocation[holding.sector]) {
-          sectorAllocation[holding.sector] += holding.shares * holding.averageCost;
-        } else {
-          sectorAllocation[holding.sector] = holding.shares * holding.averageCost;
-        }
-      });
-    });
-
-    // Calculate sector percentages
-    const totalValue = Object.values(sectorAllocation).reduce((a, b) => a + b, 0);
-    const sectorPercentages = {};
-    Object.keys(sectorAllocation).forEach(sector => {
-      sectorPercentages[sector] = ((sectorAllocation[sector] / totalValue) * 100).toFixed(2);
-    });
-
-    summary.sectorAllocation = sectorPercentages;
-    summary.totalHoldings = allHoldings.length;
-
-    res.status(200).json({
-      success: true,
-      data: summary
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching portfolio summary',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error fetching performance', error: error.message });
   }
 };
