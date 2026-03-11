@@ -14,7 +14,7 @@ function divideValues (a, b){
 }
 const percentage = (x) => (x == null ? null : x * 100);
 
-async function getLatestPrices(stockList){
+async function getLatestPrices(symbols){
   const {data} = await axios.post(
     cse_trade_summary_url,
     {},
@@ -33,5 +33,8 @@ const out = new Map();
 
 for (const sym of symbols) {
   const symbol = String(sym).toUpperCase().trim();
+  const row = list.find(
+    (x) => String(x?.symbol || x?.securityCode || "").toUpperCase() === symbol
+  );
 }
 
