@@ -58,5 +58,9 @@ function computeRatios(fin, lastPrice, lastYearData){
     }
 }
 
+  const peg =
+    pe != null && growthPct != null && growthPct !== 0 ? safeDiv(pe, growthPct) : null;
+
+
 
 
