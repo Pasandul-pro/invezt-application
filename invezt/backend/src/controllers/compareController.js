@@ -138,6 +138,16 @@ export async function compareCompanies(req, res) {
       const fin = finMap.get(symbol) || null;
       const prevFin = prevMap.get(symbol) || null;
       const lastPrice = priceMap.get(symbol) ?? null;
+
+      if (!fin) {
+        return {
+          symbol,
+          lastPrice,
+          ratios: null,
+          missing: true,
+          message: "Financials not found in DB for this period",
+        };
+      }
     
 }
 
