@@ -41,6 +41,8 @@ for (const sym of symbols) {
 
   out.set(symbol, lastTradedPrice == null ? null : Number(lastTradedPrice));
   }
-
+return out;
 }
+
+
 
