@@ -8,5 +8,7 @@ const openai = new OpenAI ({ apiKey: process.env.openai_secret_key });
 function divideValues (a, b){
   const x = Number(a);
   const y = Number(b);
-  
+
+  if(!Number.isFinite(x) || !Number.isFinite(y) || y === 0) return null;
+  return x/y;
 }
