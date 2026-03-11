@@ -36,5 +36,7 @@ for (const sym of symbols) {
   const row = list.find(
     (x) => String(x?.symbol || x?.securityCode || "").toUpperCase() === symbol
   );
+  const lastTradedPrice =
+    row?.lastTradedPrice ?? row?.lastPrice ?? row?.price ?? null;
 }
 
