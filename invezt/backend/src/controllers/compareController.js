@@ -12,3 +12,4 @@ function divideValues (a, b){
   if(!Number.isFinite(x) || !Number.isFinite(y) || y === 0) return null;
   return x/y;
 }
+const percentage = (x) => (x == null ? null : x * 100);
