@@ -32,6 +32,6 @@ const list = Array.isArray(data) ? data: data?.data ?? data?.content ?? [];
 const out = new Map();
 
 for (const sym of symbols) {
-  
+  const symbol = String(sym).toUpperCase().trim();
 }
 
