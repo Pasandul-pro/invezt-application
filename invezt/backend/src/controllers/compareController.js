@@ -13,3 +13,7 @@ function divideValues (a, b){
   return x/y;
 }
 const percentage = (x) => (x == null ? null : x * 100);
+
+async function getLatestPrices(symbols){
+  
+}
