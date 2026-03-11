@@ -155,7 +155,15 @@ export async function compareCompanies(req, res) {
         missing: false,
       };
     });
-    
+
+    let recommendation = "AI recommendation not available.";
+
+     if (process.env.openai_secret_key) {
+      const prompt =
+        "You are a financial analyst specializing in Sri Lankan stocks. " +
+        "Given these companies and their financial ratios, recommend the best one to invest in and why. " +
+        "Keep it brief and clear.\n\n" +
+        `Companies data: ${JSON.stringify(companies)}`;
 }
 
 
