@@ -1,5 +1,6 @@
 import axios from 'axios';
 import FinancialDocument from '../models/financialDocumentModel.js';
+import Stock from '../models/Stock.js';
 import calculationService from './calculationService.js';
 
 class CSEIntegrationService {
@@ -29,8 +30,13 @@ class CSEIntegrationService {
   async checkForNewAnnouncements() {
     try {
       const response = await this.client.post('getFinancialAnnouncement');
-      const announcements = response.data;
-      if (!announcements || announcements.length === 0) return;
+      // Fix: API returns { reqFinancialAnnouncemnets: [...] }
+      const announcements = response.data?.reqFinancialAnnouncemnets || [];
+      
+      if (announcements.length === 0) {
+        console.log('📢 No new CSE announcements found');
+        return;
+      }
 
       console.log(`📢 Found ${announcements.length} CSE announcements`);
       for (const announcement of announcements) {
@@ -46,9 +52,11 @@ class CSEIntegrationService {
       const symbol = announcement.symbol || announcement.companyCode;
       if (!symbol) return;
 
+      const announcementDate = new Date(announcement.manualDate || announcement.uploadedDate);
+
       const exists = await FinancialDocument.findOne({
         symbol,
-        'period.periodEndDate': new Date(announcement.date)
+        'period.periodEndDate': announcementDate
       });
       if (exists) return;
 
@@ -56,23 +64,46 @@ class CSEIntegrationService {
       let companyInfo = {};
       try {
         const params = new URLSearchParams();
-        params.append('symbol', symbol);
+        // Use realTimeStockService formatter or ensure standard suffix
+        let formattedSym = symbol;
+        if (formattedSym.length <= 5 && !formattedSym.includes('.')) formattedSym += '.N0000';
+        params.append('symbol', formattedSym);
         const infoRes = await this.client.post('companyInfoSummery', params);
         companyInfo = infoRes.data || {};
       } catch {
         // Proceed with partial data if company info fetch fails
       }
 
+      // Extract the base ticker if symbol has a suffix (e.g., COMB.N0000 -> COMB)
+      const baseTicker = String(symbol).split('.')[0].toUpperCase();
+
+      let stock = await Stock.findOne({ ticker: baseTicker });
+      if (!stock) {
+        console.log(`➕ Auto-adding missing stock: ${baseTicker}`);
+        
+        // Use CSE info if available, otherwise fallback to defaults
+        const name = companyInfo?.reqSymbolInfo?.name || baseTicker;
+        const price = companyInfo?.reqSymbolInfo?.lastTradedPrice || 0;
+        
+        stock = new Stock({
+          ticker: baseTicker,
+          companyName: name,
+          sector: 'Unclassified', // CSE API doesn't specify sector here
+          currentPrice: price
+        });
+        await stock.save();
+      }
+
       const financialData = this.extractFinancialData(announcement, companyInfo);
 
       const financialDoc = new FinancialDocument({
-        stockId: announcement.stockId,
+        stockId: stock._id,
         symbol,
         documentType: this.getDocumentType(announcement),
         period: {
           fiscalYear: new Date().getFullYear(),
           quarter: this.getQuarter(announcement),
-          periodEndDate: new Date(announcement.date)
+          periodEndDate: announcementDate
         },
         source: 'CSE',
         publishedDate: new Date(),
@@ -112,7 +143,7 @@ class CSEIntegrationService {
   }
 
   getQuarter(announcement) {
-    const month = new Date(announcement.date).getMonth();
+    const month = new Date(announcement.manualDate || announcement.uploadedDate).getMonth();
     return Math.floor(month / 3) + 1;
   }
 }
