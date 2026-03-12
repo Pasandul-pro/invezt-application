@@ -1,31 +1,23 @@
-import axios from 'axios';
+import apiClient from './apiClient.js';
 
-const api = axios.create({
-    baseURL: 'http://localhost:9003/api',
-});
-
+/**
+ * Search for news articles
+ * @param {string|object} params - search query string or object with {q, sortBy, language}
+ */
 export const searchNews = async (params) => {
-    try {
-        const response = await api.get('/news/search', {
-            params: typeof params === 'string' ? { q: params } : params
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error searching news:', error);
-        throw error;
-    }
+  const res = await apiClient.get('/news/search', {
+    params: typeof params === 'string' ? { q: params } : params
+  });
+  return res.data;
 };
 
+/**
+ * Summarize a news article using AI
+ * @param {string} content - article text content (min 50 chars)
+ */
 export const summarizeArticle = async (content) => {
-    try {
-        const response = await api.post('/news/summarize', {
-            content: content
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error summarizing article:', error);
-        throw error;
-    }
+  const res = await apiClient.post('/news/summarize', { content });
+  return res.data;
 };
 
-export default api;
+export default apiClient;
