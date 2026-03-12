@@ -1,0 +1,14 @@
+﻿--- Testing getFinancialAnnouncement ---
+Status: 200
+Announcements Found: 23
+First Announcement Sample: {"id":50758,"path":"cmt/upload_report_file/2741_1773228266391.09.2025-merged.pdf","manualDate":1790706600000,"uploadedDate":"11 Mar 2026 04:54:26 PM","fileText":"Errata to the Interim Financial Statem
+
+--- Testing companyInfoSummery (Standardized Symbols) ---
+Testing: COMB -> COMB.N0000
+  Success for COMB.N0000: true
+Testing: comb -> COMB.N0000
+  Success for COMB.N0000: true
+Testing: HNB -> HNB.N0000
+  Success for HNB.N0000: true
+Testing: JKH.N0000 -> JKH.N0000
+  Success for JKH.N0000: true
