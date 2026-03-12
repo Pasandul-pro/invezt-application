@@ -33,15 +33,7 @@ const stockSchema = new mongoose.Schema({
         pegRatio: Number,      
         beta: Number,          
         earningsYield: Number  
-    },
-    // Sector news
-    news: [{
-        headline: String,
-        summary: String,
-        source: String,
-        url: String,
-        datetime: Date
-    }]
+    }
 });
 
 export default mongoose.model('Stock', stockSchema);
