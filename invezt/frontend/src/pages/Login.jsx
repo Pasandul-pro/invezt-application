@@ -1,14 +1,27 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/dashboard');
+    setError('');
+    setLoading(true);
+    try {
+      await login(email, password);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -18,6 +31,12 @@ const Login = () => {
           <h1 className="text-3xl font-bold text-primary">Invezt</h1>
           <p className="text-gray-600 mt-2">Investing Made Simple</p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded mb-6 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
@@ -44,12 +63,15 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-full mb-3">
-            Log In
+          <button type="submit" className="btn btn-primary w-full mb-3" disabled={loading}>
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
-          
-          <Link to="/dashboard" className="btn bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white w-full block text-center">
-            Sign Up
+
+          <Link
+            to="/register"
+            className="btn bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white w-full block text-center"
+          >
+            Create Account
           </Link>
 
           <div className="text-center mt-6">
