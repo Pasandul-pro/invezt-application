@@ -1,95 +1,108 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
-import { newsData } from '../data/newsData';
+import { searchNews } from '../api/newsApi.js';
 
 const News = () => {
-  const [notifications, setNotifications] = useState({
-    priceAlertsPush: true,
-    priceAlertsEmail: false,
-    earningsReportsPush: true,
-    earningsReportsEmail: true,
-    quarterlyReportsPush: false,
-    quarterlyReportsEmail: true,
-    marketNewsPush: true,
-    marketNewsEmail: false,
-  });
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('Colombo Stock Exchange CSE Sri Lanka');
+  const [inputQuery, setInputQuery] = useState('');
 
-  const handleToggle = (key) => {
-    setNotifications(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
+  useEffect(() => {
+    loadNews(searchQuery);
+  }, [searchQuery]);
+
+  const loadNews = async (query) => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await searchNews({ q: query, sortBy: 'publishedAt', language: 'en' });
+      setArticles(data.articles || []);
+    } catch (err) {
+      setError('Could not load news. Please try again.');
+      setArticles([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const settingsItems = [
-    { key: 'priceAlertsPush', label: 'Price Alerts (Push)' },
-    { key: 'priceAlertsEmail', label: 'Price Alerts (Email)' },
-    { key: 'earningsReportsPush', label: 'Earnings Reports (Push)' },
-    { key: 'earningsReportsEmail', label: 'Earnings Reports (Email)' },
-    { key: 'quarterlyReportsPush', label: 'Quarterly Financial Reports (Push)' },
-    { key: 'quarterlyReportsEmail', label: 'Quarterly Financial Reports (Email)' },
-    { key: 'marketNewsPush', label: 'Market News Updates (Push)' },
-    { key: 'marketNewsEmail', label: 'Market News Updates (Email)' },
-  ];
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (inputQuery.trim()) {
+      setSearchQuery(inputQuery.trim());
+      setInputQuery('');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-12 text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Stay Informed with Latest News & Notifications</h1>
-          <p className="text-lg opacity-90">
-            Get daily market updates and customize notifications for price alerts and financial reports
-          </p>
+          <h1 className="text-4xl font-bold mb-4">Latest Market News</h1>
+          <p className="text-lg opacity-90">Real-time market news from CSE and Sri Lanka financial markets</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {newsData.map((news) => (
-            <div key={news.id} className="card hover:scale-105 transition-transform">
-              <h3 className="text-xl font-semibold text-primary mb-3">{news.title}</h3>
-              <div className="bg-gray-50 border-l-4 border-primary-light px-4 py-2 rounded mb-4">
-                <span className="font-mono font-bold text-sm text-gray-700">{news.date}</span>
-              </div>
-              <p className="text-gray-600 mb-4 leading-relaxed">{news.summary}</p>
-              <button className="btn btn-primary w-full">Read More</button>
-            </div>
-          ))}
-        </div>
+        {/* Search bar */}
+        <form onSubmit={handleSearch} className="card mb-8 flex gap-4">
+          <input
+            type="text"
+            value={inputQuery}
+            onChange={e => setInputQuery(e.target.value)}
+            placeholder="Search news (e.g. JKH, CSE, banking sector)..."
+            className="input flex-1"
+          />
+          <button type="submit" className="btn btn-primary">Search</button>
+          <button
+            type="button"
+            onClick={() => setSearchQuery('Colombo Stock Exchange CSE Sri Lanka')}
+            className="btn bg-gray-500 text-white hover:bg-gray-600"
+          >
+            Reset
+          </button>
+        </form>
 
-        <div className="card">
-          <h2 className="text-2xl font-bold text-primary mb-4 border-b-2 border-gray-200 pb-3">
-            Notification Settings
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Customize your alerts for price changes and financial report updates. Choose between push notifications and email.
-          </p>
-          
-          <div className="space-y-4">
-            {settingsItems.map((item) => (
-              <div key={item.key} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <label htmlFor={item.key} className="font-medium text-gray-800 cursor-pointer">
-                  {item.label}
-                </label>
-                <div className="relative inline-block w-12 h-6">
-                  <input
-                    type="checkbox"
-                    id={item.key}
-                    checked={notifications[item.key]}
-                    onChange={() => handleToggle(item.key)}
-                    className="sr-only peer"
+        {/* News articles */}
+        {loading ? (
+          <div className="text-center py-16 text-gray-500">Loading news...</div>
+        ) : error ? (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-8 text-red-700">{error}</div>
+        ) : articles.length === 0 ? (
+          <div className="text-center py-16 text-gray-500">No articles found for "{searchQuery}".</div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {articles.slice(0, 12).map((article, idx) => (
+              <div key={idx} className="card hover:scale-105 transition-transform flex flex-col">
+                {article.urlToImage && (
+                  <img
+                    src={article.urlToImage}
+                    alt={article.title}
+                    className="w-full h-40 object-cover rounded-lg mb-3"
+                    onError={e => { e.target.style.display = 'none'; }}
                   />
-                  <div className="w-12 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary-light cursor-pointer transition-colors"></div>
-                  <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
+                )}
+                <h3 className="text-lg font-semibold text-primary mb-2 line-clamp-2">{article.title}</h3>
+                <div className="bg-gray-50 border-l-4 border-primary-light px-3 py-1 rounded mb-3">
+                  <span className="text-xs text-gray-600 font-mono">
+                    {article.source?.name} · {new Date(article.publishedAt).toLocaleDateString()}
+                  </span>
                 </div>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-3 flex-grow">
+                  {article.description || 'No description available.'}
+                </p>
+                <a
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary text-sm text-center mt-auto"
+                >
+                  Read More
+                </a>
               </div>
             ))}
           </div>
-          
-          <div className="mt-6">
-            <button className="btn btn-primary">Save Settings</button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
