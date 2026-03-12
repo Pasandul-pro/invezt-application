@@ -1,39 +1,31 @@
-const mongoose = require('mongoose');
-
-// ============================================================================
-// STOCK DATABASE SCHEMA (NOW WITH PORTFOLIO TRACKING)
-// ============================================================================
+import mongoose from 'mongoose';
 
 const stockSchema = new mongoose.Schema({
-    // Core Company Data
     ticker: { type: String, required: true, unique: true }, 
     companyName: { type: String, required: true },          
     sector: { type: String, required: true },               
     currentPrice: { type: Number, required: true },         
-
-    // Market Metrics
     marketCap: { type: Number }, 
     volume: { type: Number },    
+    
+    // Last update from CSE
+    lastUpdate: { type: Date, default: Date.now },
 
-    // --- NEW: PORTFOLIO HOLDINGS ---
-    holdings: {
-        quantity: { type: Number, default: 0 },
-        avgCost: { type: Number, default: 0 }
-    },
-
-    // Financial Ratios (All 10 from your valuation model)
+    // Financial Ratios (The 10 ratios requested)
     ratios: {
         eps: Number,           
         peRatio: Number,       
         pbRatio: Number,       
         roe: Number,           
-        dividendYield: Number, 
+        roa: Number,           // Added ROA as requested in prompt
+        debtToEquity: Number,  
         currentRatio: Number,  
         quickRatio: Number,    
         pegRatio: Number,      
-        beta: Number,          
-        earningsYield: Number  
+        dividendYield: Number, 
+        profitMargin: Number   // Added profit margin
     }
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model('Stock', stockSchema);
+const Stock = mongoose.model('Stock', stockSchema);
+export default Stock;

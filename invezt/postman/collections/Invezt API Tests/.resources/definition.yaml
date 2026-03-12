@@ -1,0 +1,8 @@
+$kind: collection
+name: Invezt API Tests
+description: Test suite for the Invezt financial ratios API - covers health checks, live ratios, historical ratios, and manual calculation endpoints.
+variables:
+  - key: baseUrl
+    value: 'http://localhost:5000'
+  - key: symbol
+    value: 'JKH.N0000'

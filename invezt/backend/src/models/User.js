@@ -1,73 +1,36 @@
 import mongoose from 'mongoose';
 
-const userFile = new mongoose.Schema(
-    {
-        name: {
-            type: String,
-            trim: true,
-            required: true,
-            maxlength: 100,
+const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    minlength: 3
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  resetToken: String,
+  resetTokenExpiry: Date,
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  }
+}, {
+  timestamps: true
+});
 
-        },
-        email: {
-            type: String,
-            trim: true,
-            required: true,
-            maxlength: 255,
-            unique: true,
-            lowercase: true,
-            match: [/.+\@.+\..+/, "please enter a valid email"],
-        
-        },
-        firebaseUid: {
-            type: String,
-            required: true, 
-            unique: true,
-        },
-        photoUrl: {
-            type: String,
-            maxlength: 1024,
-            default: null,
-        },
-        emailVerified: {
-            type: Boolean,
-            default: false,
-        },
-        role: {
-            type: String,
-            default: 'user',
-            enum: ['user', 'admin'],
-        },
-
-        notificationSettings: {
-            priceAlertPush : {type: Boolean, default: true},
-            priceAlertsEmail : {type: Boolean, default: true},
-            earningsReportsPush : {type: Boolean, default: true},
-            earningsReportsEmail : {type: Boolean, default: true},
-            quarterlyReportsPush : {type: Boolean, default: true},
-            quarterlyReportsEmail : {type: Boolean, default: true},
-            marketNewsPush : {type: Boolean, default: true},
-            marketNewsEmail: {type: Boolean, default: false},
-
-        },
-
-        portfolio: [{type: String}],
-        watchlist: [{type: String}],
-
-        status: {
-            type: String,
-            enum: ['active' , 'suspended' , 'deleted'],
-            default: 'active',
-
-        },
-    },
-    {timestamps: true}
-);
-
-userFile.index({ firebaseUid: 1});
-userFile.index({ watchlist: 1});
-userFile.index({ portfolio: 1});
-userFile.index({ status: 1, role: 1});
-
-const User = mongoose.model('User', userFile);
+const User = mongoose.model('User', userSchema);
 export default User;

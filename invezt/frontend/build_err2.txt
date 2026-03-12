@@ -1,0 +1,101 @@
+
+> invezt@1.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m???[39m 3 modules transformed.
+node.exe : 
+[31mx[39m Build 
+failed in 461ms
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([31mx   
+ [39m Build faile    
+d in 461ms:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[31merror during 
+build:
+[31m[vite:css] 
+[postcss] D:/invezt-a
+pplication/invezt/fro
+ntend/src/index.css:1
+:1: Unknown word 
+<<<<<<<[31m
+file: [36mD:/invezt-
+application/invezt/fr
+ontend/src/index.css:
+1:0[31m
+    at Input.error (D
+:\invezt-application\
+invezt\frontend\node_
+modules\postcss\lib\i
+nput.js:135:16)
+    at 
+Parser.unknownWord (D
+:\invezt-application\
+invezt\frontend\node_
+modules\postcss\lib\p
+arser.js:595:22)
+    at Parser.other (
+D:\invezt-application
+\invezt\frontend\node
+_modules\postcss\lib\
+parser.js:437:12)
+    at Parser.parse (
+D:\invezt-application
+\invezt\frontend\node
+_modules\postcss\lib\
+parser.js:472:16)
+    at parse (D:\inve
+zt-application\invezt
+\frontend\node_module
+s\postcss\lib\parse.j
+s:11:12)
+    at new 
+LazyResult (D:\invezt
+-application\invezt\f
+rontend\node_modules\
+postcss\lib\lazy-resu
+lt.js:165:16)
+    at 
+Processor.process (D:
+\invezt-application\i
+nvezt\frontend\node_m
+odules\postcss\lib\pr
+ocessor.js:53:14)
+    at compileCSS (fi
+le:///D:/invezt-appli
+cation/invezt/fronten
+d/node_modules/vite/d
+ist/node/chunks/dep-B
+K3b2jBa.js:36898:59)
+    at async 
+Object.transform (fil
+e:///D:/invezt-applic
+ation/invezt/frontend
+/node_modules/vite/di
+st/node/chunks/dep-BK
+3b2jBa.js:36171:11)
+    at async 
+transform (file:///D:
+/invezt-application/i
+nvezt/frontend/node_m
+odules/rollup/dist/es
+/shared/node-entry.js
+:21239:16)[39m
