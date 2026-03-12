@@ -68,7 +68,7 @@ def fetch_market_data():
 
     print(f"[CSE Fetcher] Fetching CSE data at {time.strftime('%H:%M:%S')} ...")
     try:
-        response = requests.get(CSE_API_URL, headers=HEADERS, timeout=15)
+        response = requests.post(CSE_API_URL, headers=HEADERS, timeout=15)
         print(f"[CSE Fetcher] HTTP {response.status_code}")
 
         if response.status_code != 200:
@@ -81,8 +81,8 @@ def fetch_market_data():
         if isinstance(raw, list):
             stocks = raw
         elif isinstance(raw, dict):
-            stocks = (raw.get("data") or raw.get("content")
-                      or raw.get("stocks") or [])
+            stocks = (raw.get("reqTradeSummery") or raw.get("data") or 
+                      raw.get("content") or raw.get("stocks") or [])
         else:
             stocks = []
 
@@ -98,10 +98,10 @@ def fetch_market_data():
 
             record = {
                 "symbol":           str(symbol).strip().upper(),
-                "price":            stock.get("lastTradedPrice"),
+                "price":            stock.get("price") or stock.get("lastTradedPrice"),
                 "change":           stock.get("change"),
-                "changePercentage": stock.get("changePercentage"),
-                "volume":           stock.get("volume"),
+                "changePercentage": stock.get("percentageChange") or stock.get("changePercentage"),
+                "volume":           stock.get("sharevolume") or stock.get("volume"),
                 "marketCap":        stock.get("marketCap"),
                 "updatedAt":        time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
             }
