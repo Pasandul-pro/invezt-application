@@ -197,14 +197,30 @@ class RealTimeStockService {
     });
   }
 
+  _formatSymbol(symbol) {
+    if (!symbol) return '';
+    let sym = String(symbol).toUpperCase().trim();
+    // If it's a 3-4 letter ticker missing the .N0000 suffix, append it
+    if (sym.length <= 5 && !sym.includes('.')) {
+      sym = `${sym}.N0000`;
+    }
+    return sym;
+  }
+
   async getStockInfo(symbol) {
+    const formattedSymbol = this._formatSymbol(symbol);
     try {
       const params = new URLSearchParams();
-      params.append('symbol', symbol);
+      params.append('symbol', formattedSymbol);
       const response = await this.client.post('companyInfoSummery', params);
       const data = response.data;
+      
+      if (!data || !data.reqSymbolInfo) {
+        throw new Error(`Invalid response for ${formattedSymbol}`);
+      }
+
       return {
-        symbol: data.reqSymbolInfo?.symbol || symbol,
+        symbol: data.reqSymbolInfo?.symbol || formattedSymbol,
         name: data.reqSymbolInfo?.name || '',
         lastTradedPrice: data.reqSymbolInfo?.lastTradedPrice || null,
         change: data.reqSymbolInfo?.change || 0,
@@ -213,9 +229,9 @@ class RealTimeStockService {
         beta: data.reqSymbolBetaInfo?.betaValueSPSL || null,
         logo: data.reqLogo ? `https://www.cse.lk/${data.reqLogo.path}` : null
       };
-    } catch {
-      console.warn(`[CSE] getStockInfo failed for ${symbol} — GBM fallback`);
-      return getFakeStockInfo(symbol);
+    } catch (error) {
+      console.warn(`[CSE] getStockInfo failed for ${formattedSymbol} (${error.message}) — GBM fallback`);
+      return getFakeStockInfo(formattedSymbol);
     }
   }
 
