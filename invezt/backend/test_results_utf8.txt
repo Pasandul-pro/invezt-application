@@ -1,0 +1,37 @@
+﻿--- Testing getFinancialAnnouncement ---
+Status: 200
+Type: object
+IsArray: false
+DataKeys: [ 'reqFinancialAnnouncemnets' ]
+
+--- Testing companyInfoSummery (COMB.N0000) ---
+Status: 200
+COMB.N0000 Success: true
+Data keys: [ 'reqSymbolBetaInfo', 'reqTagsLogo', 'reqLogo', 'reqSymbolInfo' ]
+
+--- Testing companyInfoSummery (comb) ---
+node : 
+companyInfoSummery 
+comb failed: Request 
+failed with status 
+code 404
+At line:1 char:1
++ node d:\invezt-appl
+ication\invezt\backen
+d\test_cse.js > 
+d:\invezt-app ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (company   
+ InfoSumm...statu    
+s code 404:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
