@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Analyzer from './pages/Analyzer';
 import Compare from './pages/Compare';
@@ -8,24 +11,33 @@ import Portfolio from './pages/Portfolio';
 import ValuationModels from './pages/ValuationModels';
 import News from './pages/News';
 import CompanyReport from './pages/CompanyReport';
+import Learning from './pages/Learning';
+import ExternalResources from './pages/ExternalResources';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/analyzer" element={<Analyzer />} />
-        <Route path="/compare" element={<Compare />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/valuation-models" element={<ValuationModels />} />
-        <Route path="/news" element={<News />} />
-        <Route path="/company-report" element={<CompanyReport />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected routes – require login */}
+          <Route path="/dashboard"         element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/analyzer"           element={<ProtectedRoute><Analyzer /></ProtectedRoute>} />
+          <Route path="/compare"            element={<ProtectedRoute><Compare /></ProtectedRoute>} />
+          <Route path="/portfolio"          element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
+          <Route path="/valuation-models"   element={<ProtectedRoute><ValuationModels /></ProtectedRoute>} />
+          <Route path="/news"               element={<ProtectedRoute><News /></ProtectedRoute>} />
+          <Route path="/company-report"     element={<ProtectedRoute><CompanyReport /></ProtectedRoute>} />
+          <Route path="/learning"           element={<ProtectedRoute><Learning /></ProtectedRoute>} />
+          <Route path="/external-resources" element={<ProtectedRoute><ExternalResources /></ProtectedRoute>} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
 export default App;
-
