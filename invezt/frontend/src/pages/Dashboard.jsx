@@ -12,16 +12,28 @@ const Dashboard = () => {
   const [liveUsd, setLiveUsd] = useState('Loading...');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/stocks')
-      .then(response => response.json())
-      .then(data => setStocks(data))
+    // Get JWT token for protected endpoints
+    const token = localStorage.getItem('token');
+    const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    // Fetch user's manually-added stocks from MongoDB (protected)
+    fetch('http://localhost:5000/api/stocks', { headers: authHeaders })
+      .then(response => response.ok ? response.json() : [])
+      .then(data => setStocks(Array.isArray(data) ? data : []))
       .catch(error => console.error("Error fetching stocks:", error));
 
-    fetch('http://localhost:5000/api/market-highlights')
-      .then(response => response.json())
-      .then(data => setMarketHighlights(data))
-      .catch(error => console.error("Error fetching market data:", error));
+    // Correct path: /api/market/highlights — stores full snapshot
+    const loadMarket = () => {
+      fetch('http://localhost:5000/api/market/highlights')
+        .then(response => response.json())
+        .then(data => setMarketHighlights(data?.indices ? data.indices : data))
+        .catch(error => console.error("Error fetching market data:", error));
+    };
+    loadMarket();
+    // Refresh market highlights every 15 seconds (matches GBM tick)
+    const marketInterval = setInterval(loadMarket, 15000);
 
+    // Live LKR/USD exchange rate
     fetch('https://open.er-api.com/v6/latest/USD')
       .then(response => response.json())
       .then(data => {
@@ -33,6 +45,8 @@ const Dashboard = () => {
         console.error("Error fetching live USD:", error);
         setLiveUsd('Unavailable');
       });
+
+    return () => clearInterval(marketInterval);
   }, []);
 
   const handleEditClick = (stock) => {
@@ -41,8 +55,12 @@ const Dashboard = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this stock?")) return;
+    const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/stocks/${id}`, { method: 'DELETE' });
+      const response = await fetch(`http://localhost:5000/api/stocks/${id}`, {
+        method: 'DELETE',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
       if (response.ok) setStocks(stocks.filter((stock) => stock._id !== id));
     } catch (error) { console.error("Error deleting:", error); }
   };
@@ -143,14 +161,16 @@ const Dashboard = () => {
         <h2 style={{ color: '#f8fafc', marginTop: '30px', marginBottom: '20px' }}>Market Highlights</h2>
         <div style={styles.marketHighlights}>
           {['ASPI', 'S&P SL20', 'LKR/USD'].map((item, idx) => {
-            const isPositive = marketHighlights ? (idx === 0 ? marketHighlights.aspi?.isPositive : idx === 1 ? marketHighlights.sp20?.isPositive : false) : true;
+            // snapshot response: { aspi: {value, isPositive}, snp: {value, isPositive} }
+            const indexData = idx === 0 ? marketHighlights?.aspi : idx === 1 ? marketHighlights?.snp : null;
+            const isPositive = idx === 2 ? false : (indexData?.isPositive ?? true);
             const valueColor = idx === 2 ? '#ef4444' : (isPositive ? '#22c55e' : '#ef4444');
 
             return (
               <div key={item} style={styles.highlightCard}>
                 <h3 style={styles.highlightHeader}>{item}</h3>
                 <p style={{ fontSize: '24px', fontWeight: 'bold', color: valueColor }}>
-                  {idx === 2 ? liveUsd : (marketHighlights ? (idx === 0 ? marketHighlights.aspi?.value : marketHighlights.sp20?.value) : '...')}
+                  {idx === 2 ? liveUsd : (marketHighlights ? (idx === 0 ? marketHighlights.aspi?.value ?? '...' : marketHighlights.snp?.value ?? '...') : '...')}
                 </p>
               </div>
             );
