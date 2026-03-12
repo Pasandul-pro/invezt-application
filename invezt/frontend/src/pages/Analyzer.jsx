@@ -47,9 +47,12 @@ const Analyzer = () => {
     }
     
     // Fetch Stocks so we can update them on submit
-    fetch('http://localhost:5000/api/stocks')
-      .then(response => response.json())
-      .then(data => setStocks(data))
+    const token = localStorage.getItem('token');
+    fetch('http://localhost:5000/api/stocks', {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    })
+      .then(response => response.ok ? response.json() : [])
+      .then(data => setStocks(Array.isArray(data) ? data : []))
       .catch(error => console.error("Error fetching stocks:", error));
   }, [location, navigate]);
 
@@ -57,12 +60,20 @@ const Analyzer = () => {
 
   const handleAutoFetch = async () => {
     if (!formData.ticker) return alert("Please enter a Ticker symbol first!");
+    const token = localStorage.getItem('token');
     try {
       setFormData(prev => ({ ...prev, currentPrice: 'Fetching...' }));
-      const response = await fetch(`http://localhost:5000/api/quote/${formData.ticker}`);
+      // Correct path: /api/stocks/quote/:symbol
+      const response = await fetch(`http://localhost:5000/api/stocks/quote/${formData.ticker}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
       const result = await response.json();
-      if (response.ok) setFormData(prev => ({ ...prev, currentPrice: result.currentPrice, volume: result.volume }));
-      else { alert('❌ ' + result.message); setFormData(prev => ({ ...prev, currentPrice: '' })); }
+      if (response.ok && result.currentPrice) {
+        setFormData(prev => ({ ...prev, currentPrice: result.currentPrice, volume: result.volume || '' }));
+      } else {
+        alert('❌ Could not fetch live price. Try entering manually.');
+        setFormData(prev => ({ ...prev, currentPrice: '' }));
+      }
     } catch (error) {
       console.error("Error fetching live quote:", error);
       setFormData(prev => ({ ...prev, currentPrice: '' }));
@@ -83,9 +94,14 @@ const Analyzer = () => {
     };
 
     try {
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      };
       const url = editingId ? `http://localhost:5000/api/stocks/${editingId}` : 'http://localhost:5000/api/stocks';
       const method = editingId ? 'PUT' : 'POST';
-      const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(stockData) });
+      const response = await fetch(url, { method, headers, body: JSON.stringify(stockData) });
       const result = await response.json();
 
       if (response.ok) {
@@ -97,7 +113,7 @@ const Analyzer = () => {
         });
         setEditingId(null);
         alert('Analysis Saved Successfully!');
-        navigate('/dashboard'); // Go back to dashboard after saving
+        navigate('/dashboard');
       }
     } catch (error) { console.error("Failed to save:", error); }
   };
