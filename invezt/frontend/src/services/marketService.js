@@ -1,9 +1,15 @@
-import axios from "axios";
+import { getMarketSnapshot } from '../api/stockApi.js';
 
-export const getMarketData = () => {
-  return axios.get("http://localhost:5000/api/market");
-};
+/**
+ * Fetch the CSE market snapshot (ASPI, S&P SL20, gainers, losers, most active)
+ */
+export const getMarketData = () => getMarketSnapshot();
 
+/**
+ * Get real-time info for a specific stock symbol
+ * @param {string} symbol - e.g. "JKH.N0000"
+ */
 export const getStock = (symbol) => {
-  return axios.get(`http://localhost:5000/api/stock/${symbol}`);
+  const { getStockInfo } = require('../api/stockApi.js');
+  return getStockInfo(symbol);
 };
