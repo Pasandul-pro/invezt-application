@@ -9,12 +9,13 @@ const Header = () => {
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/analyzer', label: 'Analyzer' },
-    { path: '/compare', label: 'Compare' },
-    { path: '/portfolio', label: 'Portfolio' },
-    { path: '/valuation-models', label: 'Valuation Models' },
-    { path: '/news', label: 'News' },
+    { path: '/dashboard',       label: 'Dashboard' },
+    { path: '/analyzer',        label: 'Analyzer' },
+    { path: '/compare',         label: 'Compare' },
+    { path: '/portfolio',       label: 'Portfolio' },
+    { path: '/valuation-models',label: 'Models' },
+    { path: '/news',            label: 'News' },
+    { path: '/learning',        label: 'Learn' },
   ];
 
   return (
