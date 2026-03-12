@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-const authMiddleware = function (req, res, next) {
+module.exports = function (req, res, next) {
     // Get token from header
     const token = req.header('x-auth-token');
 
@@ -18,6 +18,3 @@ const authMiddleware = function (req, res, next) {
         res.status(401).json({ msg: 'Token is not valid' });
     }
 };
-
-export const protect = authMiddleware;
-export default authMiddleware;

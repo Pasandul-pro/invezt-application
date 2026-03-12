@@ -1,6 +1,6 @@
 // controllers/portfolioController.js
-import Portfolio from '../models/Portfolio.js';
-import axios from 'axios';
+const Portfolio = require('../models/Portfolio');
+const axios = require('axios');
 
 /**
  * Helper function to fetch current stock prices
@@ -25,7 +25,7 @@ const fetchCurrentPrices = async (tickers) => {
  * Get all portfolios for a user
  * GET /api/portfolios
  */
-export const getAllPortfolios = async (req, res) => {
+exports.getAllPortfolios = async (req, res) => {
   try {
     const portfolios = await Portfolio.find({ 
       userId: req.user.id,
@@ -65,7 +65,7 @@ export const getAllPortfolios = async (req, res) => {
  * Get a single portfolio by ID
  * GET /api/portfolios/:id
  */
-export const getPortfolioById = async (req, res) => {
+exports.getPortfolioById = async (req, res) => {
   try {
     const portfolio = await Portfolio.findOne({
       _id: req.params.id,
@@ -125,7 +125,7 @@ export const getPortfolioById = async (req, res) => {
  * Create a new portfolio
  * POST /api/portfolios
  */
-export const createPortfolio = async (req, res) => {
+exports.createPortfolio = async (req, res) => {
   try {
     const { name, holdings, currency } = req.body;
 
@@ -163,7 +163,7 @@ export const createPortfolio = async (req, res) => {
  * Update portfolio details
  * PUT /api/portfolios/:id
  */
-export const updatePortfolio = async (req, res) => {
+exports.updatePortfolio = async (req, res) => {
   try {
     const { name, currency } = req.body;
 
@@ -202,7 +202,7 @@ export const updatePortfolio = async (req, res) => {
  * Delete portfolio (soft delete)
  * DELETE /api/portfolios/:id
  */
-export const deletePortfolio = async (req, res) => {
+exports.deletePortfolio = async (req, res) => {
   try {
     const portfolio = await Portfolio.findOne({
       _id: req.params.id,
@@ -236,7 +236,7 @@ export const deletePortfolio = async (req, res) => {
  * Add holding to portfolio
  * POST /api/portfolios/:id/holdings
  */
-export const addHolding = async (req, res) => {
+exports.addHolding = async (req, res) => {
   try {
     const { companyTicker, companyName, shares, averageCost, purchaseDate, sector, notes } = req.body;
 
@@ -307,7 +307,7 @@ export const addHolding = async (req, res) => {
  * Update holding in portfolio
  * PUT /api/portfolios/:id/holdings/:ticker
  */
-export const updateHolding = async (req, res) => {
+exports.updateHolding = async (req, res) => {
   try {
     const { ticker } = req.params;
     const { shares, averageCost, notes } = req.body;
@@ -364,7 +364,7 @@ export const updateHolding = async (req, res) => {
  * Remove holding from portfolio
  * DELETE /api/portfolios/:id/holdings/:ticker
  */
-export const removeHolding = async (req, res) => {
+exports.removeHolding = async (req, res) => {
   try {
     const { ticker } = req.params;
     const { sharesToRemove } = req.body;
@@ -436,7 +436,7 @@ export const removeHolding = async (req, res) => {
  * Get portfolio transactions
  * GET /api/portfolios/:id/transactions
  */
-export const getTransactions = async (req, res) => {
+exports.getTransactions = async (req, res) => {
   try {
     const { page = 1, limit = 20, type, ticker } = req.query;
 
@@ -495,7 +495,7 @@ export const getTransactions = async (req, res) => {
  * Get portfolio performance over time
  * GET /api/portfolios/:id/performance
  */
-export const getPerformance = async (req, res) => {
+exports.getPerformance = async (req, res) => {
   try {
     const { period = '1M' } = req.query; // 1W, 1M, 3M, 6M, 1Y, ALL
 
@@ -601,7 +601,7 @@ export const getPerformance = async (req, res) => {
  * Get portfolio summary/dashboard
  * GET /api/portfolios/summary
  */
-export const getPortfolioSummary = async (req, res) => {
+exports.getPortfolioSummary = async (req, res) => {
   try {
     const summary = await Portfolio.getPortfolioSummary(req.user.id);
 
@@ -648,18 +648,4 @@ export const getPortfolioSummary = async (req, res) => {
       error: error.message
     });
   }
-};
-
-export default {
-  getAllPortfolios,
-  getPortfolioById,
-  createPortfolio,
-  updatePortfolio,
-  deletePortfolio,
-  addHolding,
-  updateHolding,
-  removeHolding,
-  getTransactions,
-  getPerformance,
-  getPortfolioSummary
 };

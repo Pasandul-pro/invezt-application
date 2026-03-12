@@ -1,8 +1,6 @@
 // config/db.js
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-dotenv.config(); // This opens the .env secret vault
+const mongoose = require('mongoose');
+require('dotenv').config(); // This opens the .env secret vault
 
 const connectDB = async () => {
     try {
@@ -17,4 +15,4 @@ const connectDB = async () => {
     }
 };
 
-export default connectDB;
+module.exports = connectDB;

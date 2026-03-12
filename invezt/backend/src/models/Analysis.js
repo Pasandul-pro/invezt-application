@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const analysisSchema = new mongoose.Schema({
   stockId: { type: mongoose.Schema.Types.ObjectId, ref: 'Stock', required: true },
@@ -9,4 +9,4 @@ const analysisSchema = new mongoose.Schema({
   analysisDate: { type: Date, default: Date.now }
 });
 
-export default mongoose.model('AnalysisResult', analysisSchema);
+module.exports = mongoose.model('AnalysisResult', analysisSchema);

@@ -1,8 +1,8 @@
-import User from '../models/User.js';
+const User = require('../models/User');
 
 // @route    POST api/user/watchlist
 // @desc     Add stock to watchlist
-export const addToWatchlist = async (req, res) => {
+exports.addToWatchlist = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         user.watchlist.push(req.body); // req.body should have {symbol, companyName}
@@ -15,7 +15,7 @@ export const addToWatchlist = async (req, res) => {
 
 // @route    POST api/user/transaction
 // @desc     Record a buy/sell transaction
-export const addTransaction = async (req, res) => {
+exports.addTransaction = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         user.transactions.push(req.body); // {symbol, type, quantity, price}
@@ -25,5 +25,3 @@ export const addTransaction = async (req, res) => {
         res.status(500).send('Server Error');
     }
 };
-
-export default { addToWatchlist, addTransaction };
