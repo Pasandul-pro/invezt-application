@@ -6,8 +6,23 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "dev": "nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src",
+      ".env"
+    ],
+    "ext": "js,mjs,cjs,json,env",
+    "ignore": [
+      "*.txt",
+      "server_logs*.txt",
+      "startup_error.txt",
+      "test_results*.txt",
+      "src_server_logs.txt"
+    ],
+    "exec": "node src/index.js"
   },
   "keywords": [],
   "author": "",
