@@ -1,9 +1,11 @@
-import express from 'express';
-import { protect } from '../middlewares/auth.middleware.js';
-import Watchlist from '../models/Watchlist.js';
-import realTimeStockService from '../services/realTimeStockService.js';
+import express from "express";
+import { protect } from "../middlewares/auth.middleware.js";
+import Watchlist from "../models/Watchlist.js";
+import realTimeStockService from "../services/realTimeStockService.js";
 
 const router = express.Router();
+const normalizeSymbol = (symbol) =>
+  realTimeStockService.normalizeSymbol(symbol);
 
 // All watchlist routes require authentication
 router.use(protect);
@@ -12,7 +14,7 @@ router.use(protect);
  * GET /api/watchlist
  * Get user's watchlist with live prices from CSE
  */
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     let watchlist = await Watchlist.findOne({ userId: req.user._id });
     if (!watchlist) {
@@ -20,34 +22,46 @@ router.get('/', async (req, res) => {
       return res.json({ success: true, stocks: [] });
     }
 
-    // Enrich with live CSE prices
-    const enrichedStocks = await Promise.all(
-      watchlist.stocks.map(async (item) => {
-        let currentPrice = null;
-        let change = null;
-        let changePercentage = null;
-        try {
-          const info = await realTimeStockService.getStockInfo(item.symbol);
-          currentPrice = info.lastTradedPrice;
-          change = info.change;
-          changePercentage = info.changePercentage;
-        } catch {
-          // Price unavailable — return null
-        }
-        return {
-          symbol: item.symbol,
-          companyName: item.companyName || item.symbol,
-          addedAt: item.addedAt,
-          currentPrice,
-          change,
-          changePercentage
-        };
-      })
+    const quoteSnapshot = await realTimeStockService.getQuotesForSymbols(
+      watchlist.stocks.map((item) => item.symbol),
+      {
+        maxAgeMs: 10 * 60 * 1000,
+        allowStaleCache: true,
+        allowStoredFallback: true,
+        allowSimulatedFallback: false,
+      },
     );
 
-    res.json({ success: true, stocks: enrichedStocks });
+    const quoteMap = quoteSnapshot.quoteMap || new Map();
+    const enrichedStocks = watchlist.stocks.map((item) => {
+      const quote = quoteMap.get(normalizeSymbol(item.symbol)) || null;
+      return {
+        symbol: item.symbol,
+        companyName: item.companyName || item.symbol,
+        addedAt: item.addedAt,
+        currentPrice: quote?.lastTradedPrice ?? null,
+        change: quote?.change ?? null,
+        changePercentage: quote?.changePercentage ?? null,
+        priceSource: quote?.source || "unavailable",
+        priceAsOf: quote?.priceAsOf || null,
+        priceStale: quote?.stale || false,
+      };
+    });
+
+    res.json({
+      success: true,
+      stocks: enrichedStocks,
+      pricesUpdatedAt: quoteSnapshot.fetchedAt,
+      priceSource: quoteSnapshot.source,
+      priceStale: quoteSnapshot.stale,
+      refreshIntervalMinutes: 10,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching watchlist', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching watchlist",
+      error: error.message,
+    });
   }
 });
 
@@ -56,12 +70,15 @@ router.get('/', async (req, res) => {
  * Add a stock to watchlist
  * Body: { symbol, companyName }
  */
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { symbol, companyName } = req.body;
-    if (!symbol) return res.status(400).json({ success: false, message: 'symbol is required' });
+    if (!symbol)
+      return res
+        .status(400)
+        .json({ success: false, message: "symbol is required" });
 
-    const sym = symbol.toUpperCase().trim();
+    const sym = normalizeSymbol(symbol);
     let watchlist = await Watchlist.findOne({ userId: req.user._id });
 
     if (!watchlist) {
@@ -69,17 +86,30 @@ router.post('/', async (req, res) => {
     }
 
     // Prevent duplicates
-    const exists = watchlist.stocks.some(s => s.symbol === sym);
+    const exists = watchlist.stocks.some(
+      (s) => normalizeSymbol(s.symbol) === sym,
+    );
     if (exists) {
-      return res.status(400).json({ success: false, message: `${sym} is already in your watchlist` });
+      return res.status(400).json({
+        success: false,
+        message: `${sym} is already in your watchlist`,
+      });
     }
 
     watchlist.stocks.push({ symbol: sym, companyName: companyName || sym });
     await watchlist.save();
 
-    res.status(201).json({ success: true, message: `${sym} added to watchlist`, data: watchlist });
+    res.status(201).json({
+      success: true,
+      message: `${sym} added to watchlist`,
+      data: watchlist,
+    });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'Error adding to watchlist', error: error.message });
+    res.status(400).json({
+      success: false,
+      message: "Error adding to watchlist",
+      error: error.message,
+    });
   }
 });
 
@@ -87,24 +117,35 @@ router.post('/', async (req, res) => {
  * DELETE /api/watchlist/:symbol
  * Remove a stock from watchlist
  */
-router.delete('/:symbol', async (req, res) => {
+router.delete("/:symbol", async (req, res) => {
   try {
-    const sym = req.params.symbol.toUpperCase().trim();
+    const sym = normalizeSymbol(req.params.symbol);
     const watchlist = await Watchlist.findOne({ userId: req.user._id });
 
-    if (!watchlist) return res.status(404).json({ success: false, message: 'Watchlist not found' });
+    if (!watchlist)
+      return res
+        .status(404)
+        .json({ success: false, message: "Watchlist not found" });
 
     const initialCount = watchlist.stocks.length;
-    watchlist.stocks = watchlist.stocks.filter(s => s.symbol !== sym);
+    watchlist.stocks = watchlist.stocks.filter(
+      (s) => normalizeSymbol(s.symbol) !== sym,
+    );
 
     if (watchlist.stocks.length === initialCount) {
-      return res.status(404).json({ success: false, message: `${sym} not found in watchlist` });
+      return res
+        .status(404)
+        .json({ success: false, message: `${sym} not found in watchlist` });
     }
 
     await watchlist.save();
     res.json({ success: true, message: `${sym} removed from watchlist` });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error removing from watchlist', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error removing from watchlist",
+      error: error.message,
+    });
   }
 });
 
