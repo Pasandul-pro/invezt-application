@@ -75,6 +75,10 @@ let snpValue = 4_108.2,
   snpMomentum = 0;
 const warnedFallbacks = new Set();
 const QUOTE_CACHE_TTL_MS = 10 * 60 * 1000;
+const SYMBOL_ALIASES = {
+  CMB: "COMB",
+  "CMB.N0000": "COMB.N0000",
+};
 
 function warnOnce(key, message) {
   if (warnedFallbacks.has(key)) return;
@@ -159,8 +163,10 @@ function tickFakePrices() {
   );
 }
 
-// Start the 15-second tick — 4 updates per minute
-setInterval(tickFakePrices, TICK_SECONDS * 1000);
+// Start the 15-second tick — 4 updates per minute.
+// unref keeps test and script imports from hanging the Node process.
+const fakePriceTicker = setInterval(tickFakePrices, TICK_SECONDS * 1000);
+fakePriceTicker.unref?.();
 console.log(
   "📊 [Fallback] GBM price simulator started — 15s ticks, 20 CSE stocks",
 );
@@ -274,10 +280,12 @@ class RealTimeStockService {
   _formatSymbol(symbol) {
     if (!symbol) return "";
     let sym = String(symbol).toUpperCase().trim();
+    sym = SYMBOL_ALIASES[sym] || sym;
     // If it's a 3-4 letter ticker missing the .N0000 suffix, append it
     if (sym.length <= 5 && !sym.includes(".")) {
       sym = `${sym}.N0000`;
     }
+    sym = SYMBOL_ALIASES[sym] || sym;
     return sym;
   }
 

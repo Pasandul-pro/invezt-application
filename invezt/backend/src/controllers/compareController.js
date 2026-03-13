@@ -1,21 +1,26 @@
 import axios from "axios";
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import Financials from "../models/financialDocumentModel.js";
 
 const CSE_TRADE_SUMMARY_URL = "https://www.cse.lk/api/tradeSummary";
+const DEFAULT_GROQ_COMPARE_MODELS = [
+  "llama-3.1-8b-instant",
+  "openai/gpt-oss-20b",
+];
 
-// OpenAI client — uses OPENAI_API_KEY from .env
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-  : null;
-let openAiTemporarilyDisabledUntil = 0;
-let openAiDisableReason = null;
+let groqTemporarilyDisabledUntil = 0;
+let groqDisableReason = null;
 
-function isOpenAiTemporarilyDisabled() {
-  return Date.now() < openAiTemporarilyDisabledUntil;
+function getGroqClient() {
+  const apiKey = process.env.groq_api_key || process.env.GROQ_API_KEY;
+  return apiKey ? new Groq({ apiKey }) : null;
 }
 
-function shouldPauseOpenAiRequests(error) {
+function isGroqTemporarilyDisabled() {
+  return Date.now() < groqTemporarilyDisabledUntil;
+}
+
+function shouldPauseGroqRequests(error) {
   const message = String(error?.message || "").toLowerCase();
   return (
     error?.status === 429 ||
@@ -26,12 +31,63 @@ function shouldPauseOpenAiRequests(error) {
   );
 }
 
-function pauseOpenAiRequests(reason, durationMs = 30 * 60 * 1000) {
-  openAiTemporarilyDisabledUntil = Date.now() + durationMs;
-  openAiDisableReason = reason;
+function pauseGroqRequests(reason, durationMs = 30 * 60 * 1000) {
+  groqTemporarilyDisabledUntil = Date.now() + durationMs;
+  groqDisableReason = reason;
   console.warn(
-    `OpenAI insights paused for ${Math.round(durationMs / 60000)} minutes: ${reason}`,
+    `Groq insights paused for ${Math.round(durationMs / 60000)} minutes: ${reason}`,
   );
+}
+
+function getGroqCompareModels() {
+  const configuredModel = process.env.GROQ_COMPARE_MODEL?.trim();
+  if (configuredModel) {
+    return [configuredModel, ...DEFAULT_GROQ_COMPARE_MODELS].filter(
+      (model, index, list) => model && list.indexOf(model) === index,
+    );
+  }
+
+  return DEFAULT_GROQ_COMPARE_MODELS;
+}
+
+function isGroqModelUnavailable(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    error?.code === "model_decommissioned" ||
+    error?.code === "model_not_found" ||
+    message.includes("decommissioned") ||
+    message.includes("no longer supported") ||
+    (message.includes("model") && message.includes("not found"))
+  );
+}
+
+async function generateGroqInsights(groq, prompt) {
+  let lastError = null;
+
+  for (const model of getGroqCompareModels()) {
+    try {
+      const completion = await groq.chat.completions.create({
+        model,
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 800,
+        temperature: 0.4,
+      });
+
+      return completion.choices[0]?.message?.content || null;
+    } catch (error) {
+      lastError = error;
+
+      if (!isGroqModelUnavailable(error)) {
+        throw error;
+      }
+
+      console.warn(
+        `Groq model ${model} unavailable for compare insights: ${error.message}`,
+      );
+    }
+  }
+
+  throw lastError;
 }
 
 function safeDiv(a, b) {
@@ -327,7 +383,7 @@ function computeRatios(fin, lastPrice, prevFin) {
 }
 
 /**
- * Build a concise data summary string for OpenAI to analyse.
+ * Build a concise data summary string for AI analysis.
  */
 function buildInsightPrompt(companies, period) {
   const lines = companies
@@ -382,23 +438,19 @@ export async function compareCompanies(req, res) {
         .status(400)
         .json({ status: "error", message: "Provide 1–3 stock symbols" });
     if (!["ANNUAL", "QUARTERLY"].includes(periodType))
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          message: "periodType must be ANNUAL or QUARTERLY",
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "periodType must be ANNUAL or QUARTERLY",
+      });
     if (!Number.isFinite(year))
       return res
         .status(400)
         .json({ status: "error", message: "year is required (e.g. 2024)" });
     if (periodType === "QUARTERLY" && !Number.isFinite(quarter))
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          message: "quarter required for QUARTERLY (1–4)",
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "quarter required for QUARTERLY (1–4)",
+      });
 
     // Fetch live prices from CSE
     const priceMap = await getLatestPrices(symbols);
@@ -461,40 +513,31 @@ export async function compareCompanies(req, res) {
       };
     });
 
-    // Generate AI insights via OpenAI (only if we have at least one company with data)
+    // Generate AI insights via Groq (only if we have at least one company with data)
     let aiInsights = null;
     const companiesWithData = companies.filter((c) => !c.missing);
+    const groq = getGroqClient();
 
-    if (
-      companiesWithData.length > 0 &&
-      openai &&
-      !isOpenAiTemporarilyDisabled()
-    ) {
+    if (companiesWithData.length > 0 && groq && !isGroqTemporarilyDisabled()) {
       try {
         const prompt = buildInsightPrompt(companies, {
           periodType,
           year,
           quarter,
         });
-        const completion = await openai.chat.completions.create({
-          model: "gpt-4o",
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 800,
-          temperature: 0.4,
-        });
-        aiInsights = completion.choices[0]?.message?.content || null;
+        aiInsights = await generateGroqInsights(groq, prompt);
       } catch (aiError) {
-        if (shouldPauseOpenAiRequests(aiError)) {
-          pauseOpenAiRequests(aiError.message);
+        if (shouldPauseGroqRequests(aiError)) {
+          pauseGroqRequests(aiError.message);
         } else {
-          console.warn("OpenAI insight generation failed:", aiError.message);
+          console.warn("Groq insight generation failed:", aiError.message);
         }
         aiInsights = null; // Non-fatal — return ratios without AI insights
       }
     } else if (
       companiesWithData.length > 0 &&
-      openAiDisableReason &&
-      isOpenAiTemporarilyDisabled()
+      groqDisableReason &&
+      isGroqTemporarilyDisabled()
     ) {
       aiInsights = null;
     }
@@ -507,7 +550,7 @@ export async function compareCompanies(req, res) {
         quarter: periodType === "QUARTERLY" ? quarter : null,
       },
       companies,
-      aiInsights, // null if OpenAI unavailable or no data found
+      aiInsights, // null if Groq unavailable or no data found
     });
   } catch (err) {
     return res.status(500).json({
