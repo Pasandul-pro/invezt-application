@@ -148,4 +148,52 @@ describe('Auth Logic', () => {
         });
     });
 
+    // ── Login ─────────────────────────────────────────────────────────────────
+    describe('POST /api/auth/login', () => {
+        it('should return a token with valid credentials', async () => {
+            const mockUser = {
+                _id: 'userId123',
+                username: 'testuser',
+                email: 'test@example.com',
+                password: 'hashedPassword',
+            };
+            User.findOne.mockResolvedValue(mockUser);
+            bcrypt.compare.mockResolvedValue(true);
+            jwt.sign.mockReturnValue('mockToken');
+
+            const res = await request(app)
+                .post('/api/auth/login')
+                .send({ email: 'test@example.com', password: 'password123' });
+
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('token', 'mockToken');
+            expect(res.body.email).toBe('test@example.com');
+        });
+
+        it('should return 401 when user is not found', async () => {
+            User.findOne.mockResolvedValue(null);
+
+            const res = await request(app)
+                .post('/api/auth/login')
+                .send({ email: 'ghost@example.com', password: 'password123' });
+
+            expect(res.status).toBe(401);
+            expect(res.body.message).toBe('Invalid email or password');
+        });
+
+        it('should return 401 when password does not match', async () => {
+            User.findOne.mockResolvedValue({
+                _id: 'userId123',
+                password: 'hashedPassword',
+            });
+            bcrypt.compare.mockResolvedValue(false);
+
+            const res = await request(app)
+                .post('/api/auth/login')
+                .send({ email: 'test@example.com', password: 'wrongPassword' });
+
+            expect(res.status).toBe(401);
+            expect(res.body.message).toBe('Invalid email or password');
+        });
+    });
 });
