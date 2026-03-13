@@ -41,6 +41,31 @@ describe('ValuationService', () => {
             expect(result.expectedReturn).toBe(13.4);
         });
     });
+
+    describe('calculateGordon', () => {
+        it('should calculate fair value and upside', () => {
+            const data = {
+                currentDividend: 2,
+                requiredReturn: 10,
+                dividendGrowthRate: 5,
+                currentPrice: 40
+            };
+            const result = valuationService.calculateGordon(data);
+            // Next Div = 2 * 1.05 = 2.1
+            // Fair Value = 2.1 / (0.10 - 0.05) = 2.1 / 0.05 = 42
+            // Upside = (42 - 40) / 40 = 2 / 40 = 0.05 = 5%
+            expect(result.fairValue).toBe(42);
+            expect(result.upside).toBe(5);
+            expect(result.recommendation).toBe('Hold');
+        });
+    });
+
+    describe('getRecommendation', () => {
+        it('should return Strong Buy for high upside', () => {
+            expect(valuationService.getRecommendation(35)).toBe('Strong Buy');
+        });
+        it('should return Strong Sell for high downside', () => {
+            expect(valuationService.getRecommendation(-30)).toBe('Strong Sell');
         });
     });
 });
