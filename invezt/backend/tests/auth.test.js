@@ -82,4 +82,17 @@ const createTestApp = () => {
 
     return app;
 };
+// ────────────────────────────────────────────────────────────────────────────
+
+describe('Auth Logic', () => {
+    let app;
+
+    beforeAll(() => {
+        app = createTestApp();
+    });
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
 });
