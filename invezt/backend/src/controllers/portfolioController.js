@@ -379,6 +379,13 @@ const syncPortfolioHistory = async (portfolio, summary) => {
   };
 };
 
+export const __testables = {
+  normalizeHistoryEntry,
+  buildHistoryEntry,
+  mergeHistoryEntries,
+  shouldTrackHistory,
+};
+
 /**
  * GET /api/portfolio
  */
