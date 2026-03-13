@@ -95,4 +95,57 @@ describe('Auth Logic', () => {
         jest.clearAllMocks();
     });
 
+    // ── Register ──────────────────────────────────────────────────────────────
+    describe('POST /api/auth/register', () => {
+        it('should register a new user and return a token', async () => {
+            User.findOne.mockResolvedValue(null);
+            bcrypt.hash.mockResolvedValue('hashedPassword');
+            User.create.mockResolvedValue({
+                _id: 'userId123',
+                username: 'testuser',
+                email: 'test@example.com',
+            });
+            jwt.sign.mockReturnValue('mockToken');
+
+            const res = await request(app)
+                .post('/api/auth/register')
+                .send({ username: 'testuser', email: 'test@example.com', password: 'password123' });
+
+            expect(res.status).toBe(201);
+            expect(res.body).toHaveProperty('token', 'mockToken');
+            expect(res.body.username).toBe('testuser');
+            expect(User.create).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return 400 if user already exists', async () => {
+            User.findOne.mockResolvedValue({ email: 'test@example.com' });
+
+            const res = await request(app)
+                .post('/api/auth/register')
+                .send({ username: 'testuser', email: 'test@example.com', password: 'password123' });
+
+            expect(res.status).toBe(400);
+            expect(res.body.message).toBe('User already exists');
+            expect(User.create).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 if username is too short', async () => {
+            const res = await request(app)
+                .post('/api/auth/register')
+                .send({ username: 'ab', email: 'test@example.com', password: 'password123' });
+
+            expect(res.status).toBe(400);
+            expect(res.body).toHaveProperty('errors');
+        });
+
+        it('should return 400 if password is too short', async () => {
+            const res = await request(app)
+                .post('/api/auth/register')
+                .send({ username: 'testuser', email: 'test@example.com', password: '123' });
+
+            expect(res.status).toBe(400);
+            expect(res.body).toHaveProperty('errors');
+        });
+    });
+
 });
