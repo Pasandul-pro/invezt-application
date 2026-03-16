@@ -6,6 +6,7 @@ import Header from '../components/layout/Header';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [stocks, setStocks] = useState([]);
+  const [portfolioHoldings, setPortfolioHoldings] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [marketHighlights, setMarketHighlights] = useState(null);
   const [filterSignal, setFilterSignal] = useState('ALL');
@@ -21,6 +22,16 @@ const Dashboard = () => {
       .then(response => response.ok ? response.json() : [])
       .then(data => setStocks(Array.isArray(data) ? data : []))
       .catch(error => console.error("Error fetching stocks:", error));
+
+    // Fetch real portfolio holdings for charts
+    fetch('http://localhost:5000/api/portfolio', { headers: authHeaders })
+      .then(response => response.ok ? response.json() : { data: [] })
+      .then(result => {
+        const portfolios = result.data || [];
+        const allHoldings = portfolios.flatMap(p => p.holdings || []);
+        setPortfolioHoldings(allHoldings);
+      })
+      .catch(error => console.error("Error fetching portfolio:", error));
 
     // Correct path: /api/market/highlights — stores full snapshot
     const loadMarket = () => {
@@ -103,13 +114,28 @@ const Dashboard = () => {
       return true;
     }).sort((a, b) => a.ticker.localeCompare(b.ticker));
 
-  const chartData = processedStocks.map(stock => ({ name: stock.ticker, MarketPrice: Number(stock.currentPrice), GrahamValue: calculateGrahamRaw(stock) }));
+  // Chart data: prefer portfolio holdings, fallback to analysis stocks
+  const chartData = portfolioHoldings.length > 0
+    ? portfolioHoldings.map(h => ({
+        name: h.companyTicker?.replace('.N0000', '') || h.companyTicker,
+        MarketPrice: Number(h.currentPrice || h.averageCost || 0),
+        GrahamValue: 0 // Graham requires ratios not available on portfolio holdings
+      }))
+    : processedStocks.map(stock => ({ name: stock.ticker, MarketPrice: Number(stock.currentPrice), GrahamValue: calculateGrahamRaw(stock) }));
   
-  const sectorDataRaw = processedStocks.reduce((acc, stock) => {
-    const contribution = (stock.holdings?.quantity || 0) * (stock.currentPrice || 0) > 0 ? (stock.holdings?.quantity || 0) * (stock.currentPrice || 0) : 1;
-    if (stock.sector) acc[stock.sector] = (acc[stock.sector] || 0) + contribution;
-    return acc;
-  }, {});
+  // Sector/allocation data: use portfolio holdings for pie chart
+  const sectorDataRaw = portfolioHoldings.length > 0
+    ? portfolioHoldings.reduce((acc, h) => {
+        const label = h.companyTicker?.replace('.N0000', '') || h.companyTicker || 'Unknown';
+        const value = (h.shares || 0) * (h.currentPrice || h.averageCost || 0);
+        if (value > 0) acc[label] = (acc[label] || 0) + value;
+        return acc;
+      }, {})
+    : processedStocks.reduce((acc, stock) => {
+        const contribution = (stock.holdings?.quantity || 0) * (stock.currentPrice || 0) > 0 ? (stock.holdings?.quantity || 0) * (stock.currentPrice || 0) : 1;
+        if (stock.sector) acc[stock.sector] = (acc[stock.sector] || 0) + contribution;
+        return acc;
+      }, {});
   const sectorData = Object.keys(sectorDataRaw).map(sector => ({ name: sector, value: sectorDataRaw[sector] }));
   const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
@@ -176,31 +202,6 @@ const Dashboard = () => {
             );
           })}
         </div>
-
-        <div className="no-print">
-          <div style={styles.newsCard}>
-            <h3 style={styles.newsTitle}>Latest News</h3>
-            <p style={styles.newsText}>John Keells Holdings reports strong quarterly earnings amid tourism sector recovery...</p>
-            <button onClick={() => navigate('/news')} style={styles.actionBtnSecondary}>View All News & Notifications</button>
-          </div>
-
-          <h2 style={{ color: '#f8fafc', marginTop: '30px', marginBottom: '20px' }}>Daily Market Update</h2>
-          <div style={styles.newsCard}>
-            <h3 style={styles.newsTitle}>CSE Market Update</h3>
-            <p style={styles.newsText}>Colombo Stock Exchange shows positive momentum with banking and manufacturing sectors leading gains.</p>
-            <button onClick={() => navigate('/news')} style={styles.actionBtnSecondary}>Read More</button>
-          </div>
-
-          <h2 style={{ color: '#f8fafc', marginTop: '30px', marginBottom: '20px' }}>Company Report Valuation</h2>
-          <div style={styles.newsCard}>
-            <h3 style={styles.newsTitle}>Company Report Valuation</h3>
-            <p style={styles.newsText}>Enter your company Report and Get the Evaluation directly applied to your analysis.</p>
-            <label htmlFor="file-upload" style={{ ...styles.actionBtnSecondary, display: 'inline-block', textAlign: 'center' }}>Upload Report PDF</label>
-            <input id="file-upload" type="file" accept=".pdf" style={{ display: 'none' }} onChange={() => alert("File uploaded successfully. Our engine is parsing the data.")} />
-          </div>
-        </div>
-
-        <hr style={{ border: '1px solid #334155', margin: '50px 0' }} className="no-print" />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '30px' }} className="print-card">
           <div style={styles.chartCard}>
