@@ -25,7 +25,7 @@ const fetchCurrentQuotes = async (tickers) => {
       maxAgeMs: QUOTE_REFRESH_MS,
       allowStaleCache: true,
       allowStoredFallback: true,
-      allowSimulatedFallback: false,
+      allowSimulatedFallback: true,
     });
   } catch (error) {
     console.error("Error fetching stock prices:", error.message);
