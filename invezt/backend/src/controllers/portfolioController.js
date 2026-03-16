@@ -24,7 +24,7 @@ const fetchCurrentQuotes = async (tickers) => {
     return await realTimeStockService.getQuotesForSymbols(tickers, {
       maxAgeMs: QUOTE_REFRESH_MS,
       allowStaleCache: true,
-      allowStoredFallback: true,
+      allowStoredFallback: false,
       allowSimulatedFallback: true,
     });
   } catch (error) {
