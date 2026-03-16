@@ -29,21 +29,19 @@ const financialDocumentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  financialData: {
-    revenue: Number,
-    netIncome: Number,
-    totalAssets: Number,
-    totalLiabilities: Number,
-    shareholdersEquity: Number,
-    currentAssets: Number,
-    currentLiabilities: Number,
-    inventory: Number,
-    eps: Number,
-    bookValuePerShare: Number,
-    dividendPerShare: Number,
-    totalDebt: Number,
-    outstandingShares: Number
-  }
+  revenue: Number,
+  netIncome: Number,
+  totalAssets: Number,
+  totalLiabilities: Number,
+  shareholdersEquity: Number,
+  currentAssets: Number,
+  currentLiabilities: Number,
+  inventory: Number,
+  eps: Number,
+  bookValuePerShare: Number,
+  dividendPerShare: Number,
+  totalDebt: Number,
+  outstandingShares: Number
 }, {
   timestamps: true
 });
