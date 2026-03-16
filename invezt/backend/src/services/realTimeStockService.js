@@ -500,7 +500,7 @@ class RealTimeStockService {
           fetchedAt: Date.now(),
           source: "gbm",
           isFallback: true,
-          stale: true,
+          stale: false,
         };
       }
 

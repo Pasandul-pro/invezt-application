@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
@@ -9,6 +9,34 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Market highlights state
+  const [marketHighlights, setMarketHighlights] = useState(null);
+  const [liveUsd, setLiveUsd] = useState('Loading...');
+
+  useEffect(() => {
+    // Fetch market highlights
+    const loadMarket = () => {
+      fetch('http://localhost:5000/api/market/highlights')
+        .then(response => response.json())
+        .then(data => setMarketHighlights(data?.indices ? data.indices : data))
+        .catch(() => {});
+    };
+    loadMarket();
+    const marketInterval = setInterval(loadMarket, 15000);
+
+    // Live LKR/USD exchange rate
+    fetch('https://open.er-api.com/v6/latest/USD')
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.rates && data.rates.LKR) {
+          setLiveUsd(`Rs. ${data.rates.LKR.toFixed(2)}`);
+        }
+      })
+      .catch(() => setLiveUsd('Unavailable'));
+
+    return () => clearInterval(marketInterval);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +52,44 @@ const Login = () => {
     }
   };
 
+  const tickerItems = [
+    {
+      label: 'ASPI',
+      value: marketHighlights?.aspi?.value ?? '...',
+      isPositive: marketHighlights?.aspi?.isPositive ?? true,
+    },
+    {
+      label: 'S&P SL20',
+      value: marketHighlights?.snp?.value ?? '...',
+      isPositive: marketHighlights?.snp?.isPositive ?? true,
+    },
+    {
+      label: 'LKR/USD',
+      value: liveUsd,
+      isPositive: false,
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-primary-light flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary to-primary-light flex flex-col items-center justify-center p-4">
+      {/* Market Highlights Ticker */}
+      <div style={tickerStyles.wrapper}>
+        <div style={tickerStyles.track}>
+          {[...tickerItems, ...tickerItems, ...tickerItems].map((item, idx) => (
+            <span key={idx} style={tickerStyles.item}>
+              <span style={tickerStyles.label}>{item.label}</span>
+              <span style={{
+                ...tickerStyles.value,
+                color: item.label === 'LKR/USD' ? '#fbbf24' : (item.isPositive ? '#4ade80' : '#f87171')
+              }}>
+                {item.value}
+              </span>
+              <span style={tickerStyles.separator}>•</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary">Invezt</h1>
@@ -85,8 +149,57 @@ const Login = () => {
           </Link>
         </div>
       </div>
+
+      <style>{`
+        @keyframes tickerScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
+        }
+      `}</style>
     </div>
   );
+};
+
+const tickerStyles = {
+  wrapper: {
+    width: '100%',
+    maxWidth: '600px',
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: '12px',
+    marginBottom: '24px',
+    backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(255,255,255,0.1)',
+  },
+  track: {
+    display: 'flex',
+    whiteSpace: 'nowrap',
+    animation: 'tickerScroll 20s linear infinite',
+    padding: '12px 0',
+  },
+  item: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '0 20px',
+    flexShrink: 0,
+  },
+  label: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: '13px',
+    fontWeight: 600,
+    fontFamily: 'Inter, sans-serif',
+  },
+  value: {
+    fontSize: '14px',
+    fontWeight: 700,
+    fontFamily: 'Inter, sans-serif',
+  },
+  separator: {
+    color: 'rgba(255,255,255,0.2)',
+    fontSize: '10px',
+    marginLeft: '14px',
+  },
 };
 
 export default Login;
