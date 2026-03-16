@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Header from '../components/layout/Header';
 
 const LearningCard = ({
     level,
@@ -82,6 +83,7 @@ const Learning = () => {
 
     return (
         <div className="min-h-screen pb-20 animate-fadeIn">
+            <Header />
             {/* Hero Section */}
             <header className="relative overflow-hidden border-b border-slate-800 bg-slate-950/40">
                 <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-transparent"></div>
