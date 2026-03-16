@@ -1,39 +1,52 @@
 import FinancialDocument from '../models/financialDocumentModel.js';
 import CalculatedRatio from '../models/calculatedRatioModel.js';
 import StockPrice from '../models/stockPriceModel.js';
+import Stock from '../models/Stock.js';
 
 class CalculationService {
   
   async calculateForStock(symbol) {
     try {
-      const financialDoc = await FinancialDocument.findOne({ symbol })
+      const baseTicker = String(symbol).split('.')[0].toUpperCase();
+      
+      const financialDoc = await FinancialDocument.findOne({ 
+          $or: [{ symbol: baseTicker }, { symbol: symbol.toUpperCase() }] 
+        })
         .sort({ 'period.periodEndDate': -1 });
       
-      if (!financialDoc) return null;
+      if (!financialDoc) {
+        console.warn(`No financial document found for ${symbol} (base: ${baseTicker})`);
+        return null;
+      }
 
-      const latestPrice = await StockPrice.findOne({ symbol })
+      const stockDoc = await Stock.findOne({ ticker: baseTicker });
+      const latestPrice = await StockPrice.findOne({ 
+          $or: [{ symbol: baseTicker }, { symbol: symbol.toUpperCase() }] 
+        })
         .sort({ timestamp: -1 });
-      const currentPrice = latestPrice?.price || 0;
+      const currentPrice = latestPrice?.price || stockDoc?.currentPrice || 0;
+
+      if (!currentPrice || currentPrice === 0) {
+        console.warn(`No price found for ${symbol} (base: ${baseTicker})`);
+        // We continue anyway if we have EPS/BVPS, but PE/PB will be null
+      }
 
       const prevDoc = await FinancialDocument.findOne({
-        symbol,
+        $or: [{ symbol: baseTicker }, { symbol: symbol.toUpperCase() }],
         'period.fiscalYear': financialDoc.period.fiscalYear - 1
       });
 
-      const data = financialDoc.financialData;
-      const prevData = prevDoc?.financialData;
-
       const ratios = {
-        pe: this.calculatePE(currentPrice, data.eps),
-        pb: this.calculatePB(currentPrice, data.bookValuePerShare),
-        roe: this.calculateROE(data.netIncome, data.shareholdersEquity),
-        roa: this.calculateROA(data.netIncome, data.totalAssets),
-        debtToEquity: this.calculateDebtToEquity(data.totalDebt, data.shareholdersEquity),
-        currentRatio: this.calculateCurrentRatio(data.currentAssets, data.currentLiabilities),
-        quickRatio: this.calculateQuickRatio(data.currentAssets, data.inventory, data.currentLiabilities),
-        eps: data.eps,
-        dividendYield: this.calculateDividendYield(data.dividendPerShare, currentPrice),
-        peg: this.calculatePEG(currentPrice, data.eps, this.calculateGrowth(data.eps, prevData?.eps))
+        peRatio: this.calculatePE(currentPrice, financialDoc.eps),
+        pbRatio: this.calculatePB(currentPrice, financialDoc.bookValuePerShare),
+        roe: this.calculateROE(financialDoc.netIncome, financialDoc.shareholdersEquity),
+        roa: this.calculateROA(financialDoc.netIncome, financialDoc.totalAssets),
+        debtToEquity: this.calculateDebtToEquity(financialDoc.totalDebt, financialDoc.shareholdersEquity),
+        currentRatio: this.calculateCurrentRatio(financialDoc.currentAssets, financialDoc.currentLiabilities),
+        quickRatio: this.calculateQuickRatio(financialDoc.currentAssets, financialDoc.inventory, financialDoc.currentLiabilities),
+        eps: financialDoc.eps,
+        dividendYield: this.calculateDividendYield(financialDoc.dividendPerShare, currentPrice),
+        pegRatio: this.calculatePEG(currentPrice, financialDoc.eps, this.calculateGrowth(financialDoc.eps, prevDoc?.eps))
       };
 
       const calculatedRatio = new CalculatedRatio({
@@ -41,10 +54,29 @@ class CalculationService {
         symbol: symbol,
         financialDocumentId: financialDoc._id,
         period: financialDoc.period,
-        ratios: ratios
+        ratios: {
+          ...ratios,
+          pe: ratios.peRatio,
+          pb: ratios.pbRatio,
+          peg: ratios.pegRatio
+        }
       });
 
       await calculatedRatio.save();
+
+      // Also update the Stock model's ratios field for the Dashboard
+      await Stock.findOneAndUpdate(
+        { ticker: baseTicker },
+        { 
+          $set: { 
+            ratios: ratios,
+            currentPrice: currentPrice,
+            lastUpdate: new Date()
+          } 
+        },
+        { new: true }
+      );
+
       return calculatedRatio;
 
     } catch (error) {
@@ -128,10 +160,10 @@ class CalculationService {
       let updatedRatios = { ...latestRatios.ratios };
       
       if (financialDoc && latestPrice) {
-        updatedRatios.pe = this.calculatePE(latestPrice.price, financialDoc.financialData.eps);
-        updatedRatios.pb = this.calculatePB(latestPrice.price, financialDoc.financialData.bookValuePerShare);
+        updatedRatios.pe = this.calculatePE(latestPrice.price, financialDoc.eps);
+        updatedRatios.pb = this.calculatePB(latestPrice.price, financialDoc.bookValuePerShare);
         updatedRatios.dividendYield = this.calculateDividendYield(
-          financialDoc.financialData.dividendPerShare, 
+          financialDoc.dividendPerShare, 
           latestPrice.price
         );
       }

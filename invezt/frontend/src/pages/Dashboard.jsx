@@ -90,8 +90,18 @@ const Dashboard = () => {
     const eps = Number(stock.ratios?.eps);
     const pb = Number(stock.ratios?.pbRatio);
     const price = Number(stock.currentPrice);
-    if (!eps || !pb || !price || eps <= 0 || pb <= 0) return 0;
-    return Math.sqrt(22.5 * eps * (price / pb));
+    
+    if (!eps || !pb || !price || eps <= 0 || pb <= 0) {
+      if (stock.ticker === 'JKH') {
+        console.log(`Graham debug [${stock.ticker}]: missing data`, { eps, pb, price });
+      }
+      return 0;
+    }
+    const val = Math.sqrt(22.5 * eps * (price / pb));
+    if (stock.ticker === 'JKH') {
+      console.log(`Graham debug [${stock.ticker}]:`, val);
+    }
+    return val;
   };
 
   const calculateCAPM = (stock) => {

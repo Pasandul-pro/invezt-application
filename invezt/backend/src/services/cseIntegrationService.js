@@ -107,7 +107,7 @@ class CSEIntegrationService {
         },
         source: 'CSE',
         publishedDate: new Date(),
-        financialData
+        ...financialData
       });
 
       await financialDoc.save();
