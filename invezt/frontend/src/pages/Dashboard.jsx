@@ -11,6 +11,12 @@ const Dashboard = () => {
   const [marketHighlights, setMarketHighlights] = useState(null);
   const [filterSignal, setFilterSignal] = useState('ALL');
   const [liveUsd, setLiveUsd] = useState('Loading...');
+  
+  // States for Company Report Valuation
+  const [reportFile, setReportFile] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [valuationResult, setValuationResult] = useState(null);
+  const [analysisError, setAnalysisError] = useState(null);
 
   useEffect(() => {
     // Get JWT token for protected endpoints
@@ -84,6 +90,48 @@ const Dashboard = () => {
     if (pe < 16 && pb < 1.6) return { text: '✅ BUY', color: '#4ade80', bg: '#4ade8020' };
     if (pe > 25 || pb > 3) return { text: '🚨 OVERVALUED', color: '#ef4444', bg: '#ef444420' };
     return { text: '⚖️ HOLD', color: '#eab308', bg: '#eab30820' };
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setReportFile(e.target.files[0]);
+      setValuationResult(null);
+      setAnalysisError(null);
+    }
+  };
+
+  const handleAnalyzeReport = async () => {
+    if (!reportFile) {
+      setAnalysisError('Please select a PDF report to analyze.');
+      return;
+    }
+    
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    setValuationResult(null);
+
+    const formData = new FormData();
+    formData.append('report', reportFile);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/valuation/report', {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        body: formData
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to analyze report.');
+      }
+
+      setValuationResult(data.data);
+    } catch (err) {
+      setAnalysisError(err.message);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const calculateGrahamRaw = (stock) => {
@@ -270,6 +318,84 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* --- Company Report Valuation Section --- */}
+        <h2 style={{ color: '#f8fafc', marginTop: '40px', marginBottom: '20px' }} className="no-print">Company Report Valuation</h2>
+        <div style={styles.reportCard} className="no-print">
+          <p style={{ color: '#94a3b8', marginBottom: '20px' }}>Upload a company's Annual Report or Financial Statement (PDF) to get an instant AI-powered valuation and investment summary.</p>
+          
+          <div style={styles.uploadContainer}>
+            <input 
+              type="file" 
+              accept=".pdf" 
+              onChange={handleFileChange} 
+              style={{ color: '#f8fafc', marginBottom: '15px', padding: '10px', width: '100%', border: '1px dashed #334155', borderRadius: '8px' }}
+            />
+            <button 
+              onClick={handleAnalyzeReport} 
+              disabled={!reportFile || isAnalyzing}
+              style={{ ...styles.actionBtn, opacity: (!reportFile || isAnalyzing) ? 0.7 : 1, width: 'auto' }}
+            >
+              {isAnalyzing ? 'Analyzing Report... (This may take a minute)' : 'Generate AI Valuation'}
+            </button>
+          </div>
+
+          {analysisError && (
+            <div style={{ padding: '15px', backgroundColor: '#ef444420', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '8px', marginTop: '20px' }}>
+              ⚠️ {analysisError}
+            </div>
+          )}
+
+          {valuationResult && (
+            <div style={styles.analysisResult}>
+              <div style={styles.resultHeader}>
+                <h3 style={{ margin: 0, color: '#f8fafc' }}>AI Analysis Results</h3>
+                <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '14px', fontWeight: 'bold', backgroundColor: valuationResult.recommendation?.signal?.includes('Buy') ? '#22c55e20' : valuationResult.recommendation?.signal?.includes('Sell') ? '#ef444420' : '#eab30820', color: valuationResult.recommendation?.signal?.includes('Buy') ? '#4ade80' : valuationResult.recommendation?.signal?.includes('Sell') ? '#f87171' : '#facc15' }}>
+                  {valuationResult.recommendation?.signal || 'Unknown'}
+                </span>
+              </div>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ color: '#60a5fa', marginBottom: '10px' }}>Financial Summary</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                  <div style={styles.metricBox}>
+                    <span style={styles.metricLabel}>Revenue</span>
+                    <span style={styles.metricValue}>{valuationResult.financialSummary?.revenue || 'N/A'}</span>
+                  </div>
+                  <div style={styles.metricBox}>
+                    <span style={styles.metricLabel}>Net Income</span>
+                    <span style={styles.metricValue}>{valuationResult.financialSummary?.netIncome || 'N/A'}</span>
+                  </div>
+                  <div style={styles.metricBox}>
+                    <span style={styles.metricLabel}>EPS</span>
+                    <span style={styles.metricValue}>{valuationResult.financialSummary?.eps || 'N/A'}</span>
+                  </div>
+                  <div style={styles.metricBox}>
+                    <span style={styles.metricLabel}>Est. Intrinsic Value</span>
+                    <span style={{ ...styles.metricValue, color: '#4ade80' }}>{valuationResult.valuation?.estimatedIntrinsicValue || 'N/A'}</span>
+                  </div>
+                </div>
+                <div style={{ backgroundColor: '#0f172a', padding: '15px', borderRadius: '8px', fontSize: '14px', color: '#cbd5e1' }}>
+                  <strong>Valuation Methodology:</strong> {valuationResult.valuation?.methodologyUsed || 'Not provided'}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ color: '#60a5fa', marginBottom: '10px' }}>Key Takeaways</h4>
+                <ul style={{ color: '#cbd5e1', paddingLeft: '20px', margin: 0 }}>
+                  {valuationResult.financialSummary?.keyTakeaways?.map((takeaway, i) => (
+                    <li key={i} style={{ marginBottom: '8px' }}>{takeaway}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4 style={{ color: '#60a5fa', marginBottom: '10px' }}>Investment Justification</h4>
+                <p style={{ color: '#f8fafc', lineHeight: '1.6', margin: 0 }}>{valuationResult.recommendation?.justification}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '15px' }} className="no-print">
           <button onClick={() => window.print()} style={styles.pdfBtn}>📄 Download PDF Report</button>
         </div>
@@ -309,7 +435,14 @@ const styles = {
   iconBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' },
   filterBtn: { padding: '8px 16px', color: 'white', border: '1px solid #334155', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' },
   pdfBtn: { padding: '10px 20px', backgroundColor: '#f43f5e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
-  input: { padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' }
+  input: { padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' },
+  reportCard: { backgroundColor: '#1e293b', padding: '30px', borderRadius: '12px', border: '1px solid #334155', marginBottom: '30px' },
+  uploadContainer: { display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: '#0f172a', padding: '20px', borderRadius: '8px', border: '1px solid #334155' },
+  analysisResult: { marginTop: '30px', padding: '25px', backgroundColor: '#0f172a', borderRadius: '10px', border: '1px solid #475569' },
+  resultHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #334155' },
+  metricBox: { backgroundColor: '#1e293b', padding: '15px', borderRadius: '8px', display: 'flex', flexDirection: 'column', border: '1px solid #334155' },
+  metricLabel: { color: '#94a3b8', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '5px' },
+  metricValue: { color: '#f8fafc', fontSize: '18px', fontWeight: 'bold' }
 };
 
 export default Dashboard;

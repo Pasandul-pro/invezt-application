@@ -1,9 +1,11 @@
 import express from 'express';
+import multer from 'multer';
 import Valuation from '../models/Valuation.js';
 import valuationService from '../services/valuationService.js';
 import { protect } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(protect);
 
@@ -84,6 +86,28 @@ router.get('/history', async (req, res) => {
             success: true,
             count: valuations.length,
             data: valuations
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+router.post('/report', upload.single('report'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No PDF file uploaded.' });
+        }
+        
+        // Ensure it's a PDF (basic mimetype check)
+        if (req.file.mimetype !== 'application/pdf') {
+            return res.status(400).json({ success: false, error: 'Uploaded file must be a PDF.' });
+        }
+
+        const analysis = await valuationService.analyzeReport(req.file.buffer);
+
+        res.status(200).json({
+            success: true,
+            data: analysis
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
