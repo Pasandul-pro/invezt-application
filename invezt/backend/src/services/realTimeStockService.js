@@ -314,7 +314,7 @@ class RealTimeStockService {
   _normalizeTradeSummaryPayload(payload) {
     const list = Array.isArray(payload)
       ? payload
-      : (payload?.data ?? payload?.content ?? []);
+      : (payload?.reqTradeSummery ?? payload?.data ?? payload?.content ?? []);
 
     return list.map(buildQuoteFromTradeRow).filter(Boolean);
   }

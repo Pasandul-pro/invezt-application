@@ -126,7 +126,7 @@ async function getLatestPrices(symbols) {
 
     const list = Array.isArray(data)
       ? data
-      : (data?.data ?? data?.content ?? []);
+      : (data?.reqTradeSummery ?? data?.data ?? data?.content ?? []);
     const out = new Map();
 
     for (const sym of symbols) {
