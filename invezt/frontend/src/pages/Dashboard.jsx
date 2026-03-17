@@ -258,7 +258,6 @@ const Dashboard = () => {
             <h3 style={styles.actionCardTitle}>Company Reports</h3>
             <p style={styles.actionCardText}>Valuate your company Through Your Report</p>
             <button onClick={() => {
-              alert("Please scroll down to the 'Company Report Valuation' section to upload your PDF report.");
               window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }} style={styles.actionBtn}>Go</button>
           </div>

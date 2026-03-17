@@ -96,7 +96,8 @@ class ValuationService {
     async analyzeReport(pdfBuffer) {
         try {
             // 1. Extract text from PDF
-            const pdfData = await pdfParse(pdfBuffer);
+            // We set verbosityLevel: 0 to silence font engine warnings like "TT: CALL empty stack"
+            const pdfData = await pdfParse(pdfBuffer, { verbosityLevel: 0 });
             let text = pdfData.text;
 
             // Optional: Truncate text if it's monstrously huge (e.g., limit to first/last 20k chars)
