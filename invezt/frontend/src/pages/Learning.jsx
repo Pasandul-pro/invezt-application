@@ -361,9 +361,9 @@ const Learning = () => {
                 )}
             </main>
 
-            {/* Footer */}
-            <footer className="max-w-7xl mx-auto px-4 mt-20 pt-16 border-t border-slate-800">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+            {/* Resources Disclaimer */}
+            <div className="max-w-7xl mx-auto px-4 mt-20 pt-16 border-t border-slate-800 pb-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     <div>
                         <h5 className="text-sm font-bold text-white uppercase tracking-widest mb-6">Learning Path Guide</h5>
                         <ul className="space-y-4 text-xs">
@@ -396,10 +396,7 @@ const Learning = () => {
                         </p>
                     </div>
                 </div>
-                <div className="text-center pb-12">
-                    <p className="text-[10px] font-bold text-slate-700 uppercase tracking-[0.2em]">Invezt Learning Hub • 2026</p>
-                </div>
-            </footer>
+            </div>
         </div>
     );
 };

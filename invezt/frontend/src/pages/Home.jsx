@@ -31,15 +31,20 @@ const Home = () => {
       })
       .catch(() => {});
 
-    // Live LKR/USD rate
-    fetch('https://open.er-api.com/v6/latest/USD')
-      .then(r => r.json())
-      .then(data => {
-        if (data?.rates?.LKR) {
-          setMarketData(prev => ({ ...prev, lkrUsd: `Rs. ${data.rates.LKR.toFixed(2)}` }));
-        }
-      })
-      .catch(() => {});
+    // Live LKR/USD exchange rate via backend cache (real-time updates)
+    const loadExchangeRate = () => {
+      fetch('http://localhost:5000/api/market/exchange-rate')
+        .then(r => r.json())
+        .then(data => {
+          if (data?.rate) {
+            setMarketData(prev => ({ ...prev, lkrUsd: `Rs. ${data.rate.toFixed(2)}` }));
+          }
+        })
+        .catch(() => {});
+    };
+    
+    loadExchangeRate();
+    const exchangeInterval = setInterval(loadExchangeRate, 60000);
 
     // Fetch live prices for featured stocks (uses GBM fallback if CSE down)
     FEATURED_SYMBOLS.forEach(symbol => {
@@ -83,7 +88,10 @@ const Home = () => {
       });
     }, 15000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      clearInterval(exchangeInterval);
+    };
   }, []);
 
   const features = [
@@ -190,12 +198,6 @@ const Home = () => {
         </div>
       </section>
 
-      <footer className="bg-primary text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-lg font-semibold mb-2">Invezt © 2025</p>
-          <p className="text-sm opacity-90">Smart investing in the Colombo Stock Exchange starts with proper valuation</p>
-        </div>
-      </footer>
     </div>
   );
 };
