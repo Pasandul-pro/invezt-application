@@ -25,17 +25,25 @@ const Login = () => {
     loadMarket();
     const marketInterval = setInterval(loadMarket, 15000);
 
-    // Live LKR/USD exchange rate
-    fetch('https://open.er-api.com/v6/latest/USD')
-      .then(response => response.json())
-      .then(data => {
-        if (data && data.rates && data.rates.LKR) {
-          setLiveUsd(`Rs. ${data.rates.LKR.toFixed(2)}`);
-        }
-      })
-      .catch(() => setLiveUsd('Unavailable'));
+    // Live LKR/USD exchange rate via backend cache (real-time updates)
+    const loadExchangeRate = () => {
+      fetch('http://localhost:5000/api/market/exchange-rate')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.rate) {
+            setLiveUsd(`Rs. ${data.rate.toFixed(2)}`);
+          }
+        })
+        .catch(() => setLiveUsd('Unavailable'));
+    };
+    
+    loadExchangeRate();
+    const exchangeInterval = setInterval(loadExchangeRate, 60000);
 
-    return () => clearInterval(marketInterval);
+    return () => {
+      clearInterval(marketInterval);
+      clearInterval(exchangeInterval);
+    };
   }, []);
 
   const handleSubmit = async (e) => {
