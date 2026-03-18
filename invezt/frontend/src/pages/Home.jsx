@@ -190,12 +190,6 @@ const Home = () => {
         </div>
       </section>
 
-      <footer className="bg-primary text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-lg font-semibold mb-2">Invezt © 2025</p>
-          <p className="text-sm opacity-90">Smart investing in the Colombo Stock Exchange starts with proper valuation</p>
-        </div>
-      </footer>
     </div>
   );
 };
