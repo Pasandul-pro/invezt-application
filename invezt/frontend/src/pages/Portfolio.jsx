@@ -370,59 +370,68 @@ const Portfolio = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100 animate-fadeIn">
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-12 text-center mb-8 backdrop-blur-sm">
-          <h1 className="text-4xl font-bold mb-4">Portfolio &amp; Watchlist</h1>
-          <p className="text-lg opacity-90 text-blue-100">
+        <div className="premium-gradient p-12 rounded-3xl text-center mb-8 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <h1 className="text-4xl font-extrabold mb-4 tracking-tight drop-shadow-md">Portfolio &amp; Watchlist</h1>
+          <p className="text-lg text-blue-100/90 font-medium max-w-2xl mx-auto">
             Track your CSE investments with official Colombo Stock Exchange
             snapshots refreshed every 10 minutes
           </p>
         </div>
 
-        <div className="mb-6 rounded-2xl border border-blue-500/30 bg-blue-900/20 px-5 py-4 text-sm text-blue-100 backdrop-blur-sm">
-          <div className="font-semibold text-blue-300">
-            Portfolio prices use the latest CSE snapshot.
-          </div>
-          <div className="mt-1 text-slate-400">
-            Last update:{" "}
-            {formatSnapshotTime(portfolioSnapshotMeta.pricesUpdatedAt)}
-            {portfolioSnapshotMeta.priceStale
-              ? " • showing the latest stored official prices because the live feed is temporarily unavailable"
-              : ""}
+        <div className="mb-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 px-6 py-4 text-sm text-blue-200/80 backdrop-blur-md flex items-center gap-3 animate-slideUp">
+          <span className="text-xl">ℹ️</span>
+          <div>
+            <div className="font-bold text-blue-400">
+              Portfolio prices use the latest CSE snapshot.
+            </div>
+            <div className="mt-0.5 opacity-70">
+              Last update:{" "}
+              {formatSnapshotTime(portfolioSnapshotMeta.pricesUpdatedAt)}
+              {portfolioSnapshotMeta.priceStale
+                ? " • showing the latest stored official prices because the live feed is temporarily unavailable"
+                : ""}
+            </div>
           </div>
         </div>
 
         {/* Summary Cards */}
         {selectedPortfolio && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {[
               {
                 label: "Total Value",
                 value: `LKR ${totalValue.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`,
+                icon: "💰"
               },
               {
                 label: "Total Investment",
                 value: `LKR ${totalInvestment.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`,
+                icon: "📈"
               },
               {
                 label: "Gain / Loss",
                 value: `LKR ${totalGainLoss.toLocaleString("en-LK", { minimumFractionDigits: 2 })}`,
-                color: totalGainLoss >= 0 ? "text-green-600" : "text-red-600",
+                color: totalGainLoss >= 0 ? "text-green-400" : "text-red-400",
+                icon: "⚖️"
               },
               {
                 label: "Return %",
                 value: `${totalGainLossPercent >= 0 ? "+" : ""}${totalGainLossPercent}%`,
                 color:
-                  totalGainLossPercent >= 0 ? "text-green-600" : "text-red-600",
+                  totalGainLossPercent >= 0 ? "text-green-400" : "text-red-400",
+                icon: "📊"
               },
             ].map((card, i) => (
-              <div key={i} className="card text-center border-slate-700/50">
-                <p className="text-sm text-slate-400 mb-1">{card.label}</p>
+              <div key={i} className="glass-card p-6 rounded-2xl text-center hover:glow-blue transition-all duration-300 animate-slideUp" style={{ animationDelay: `${i * 100}ms` }}>
+                <div className="text-2xl mb-2">{card.icon}</div>
+                <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">{card.label}</p>
                 <p
-                  className={`text-xl font-bold ${card.color || "text-blue-400"}`}
+                  className={`text-xl font-black ${card.color || "text-blue-400"} text-glow`}
                 >
                   {card.value}
                 </p>
@@ -433,42 +442,45 @@ const Portfolio = () => {
 
         {/* Portfolio Growth Over Time Chart */}
         {activeHoldings.length > 0 && (
-          <div className="card mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">
-              Portfolio Growth Over Time
+          <div className="card mb-8 animate-fadeIn">
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+               <span className="text-xl">📈</span> Portfolio Growth Over Time
             </h2>
-            <p className="text-sm text-slate-400 mb-6">
+            <p className="text-sm text-slate-400 mb-8">
               Real portfolio tracking from saved 10-minute CSE snapshots
             </p>
-            {hasTrackedHistory ? (
-              <>
-                <Line data={growthChartData} options={growthChartOptions} />
-                <p className="mt-4 text-xs text-gray-500">
-                  Tracking started:{" "}
-                  {formatSnapshotTime(selectedPortfolio?.trackedSince)}
-                  {!hasMultiPointHistory
-                    ? " • Waiting for the next 10-minute snapshot to draw a trend"
-                    : ""}
-                </p>
-              </>
-            ) : (
-              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/50 px-5 py-8 text-sm text-slate-400">
-                Real portfolio tracking has started. The first CSE snapshot will
-                appear here, and the chart will build over time every 10
-                minutes.
-              </div>
-            )}
+            <div className="p-4 bg-slate-900/30 rounded-2xl border border-white/5">
+              {hasTrackedHistory ? (
+                <>
+                  <Line data={growthChartData} options={growthChartOptions} />
+                  <p className="mt-6 text-[10px] text-slate-500 font-bold uppercase tracking-wider text-center">
+                    Tracking started:{" "}
+                    <span className="text-slate-400">{formatSnapshotTime(selectedPortfolio?.trackedSince)}</span>
+                    {!hasMultiPointHistory
+                      ? " • Waiting for the next 10-minute snapshot to draw a trend"
+                      : ""}
+                  </p>
+                </>
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/20 px-8 py-12 text-center">
+                  <p className="text-slate-400 font-medium">Real portfolio tracking has started.</p>
+                  <p className="text-xs text-slate-500 mt-2">The first CSE snapshot will appear here shortly, and the chart will build every 10 minutes.</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Portfolio Section */}
-        <div className="card mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">My Portfolio</h2>
+        <div className="card mb-8 animate-fadeIn">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <span className="text-xl">💼</span> My Portfolio
+            </h2>
             {portfolios.length === 0 && !loadingPortfolio && (
               <button
                 onClick={handleCreatePortfolio}
-                className="btn btn-primary bg-blue-600 hover:bg-blue-500"
+                className="btn btn-primary shadow-lg shadow-blue-600/20"
               >
                 + Create Portfolio
               </button>
@@ -554,80 +566,80 @@ const Portfolio = () => {
               )}
 
               {activeHoldings.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  {selectedPortfolio
-                    ? "No holdings yet. Add your first stock above."
-                    : "Create a portfolio to get started."}
-                </p>
+                <div className="text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-700">
+                  <p className="text-slate-500 font-medium">
+                    {selectedPortfolio
+                      ? "No holdings yet. Add your first stock above."
+                      : "Create a portfolio to get started."}
+                  </p>
+                </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto rounded-xl border border-white/5">
+                  <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-900/50">
+                      <tr className="bg-slate-900/80">
                         {[
                           "Company",
                           "Shares",
-                          "Avg. Cost (LKR)",
-                          "Current Price (LKR)",
-                          "Value (LKR)",
+                          "Avg. Cost",
+                          "Current Price",
+                          "Value",
                           "Gain/Loss (%)",
                         ].map((h) => (
                           <th
                             key={h}
-                            className="px-4 py-3 text-left text-sm font-semibold text-blue-400"
+                            className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-blue-500 border-b border-white/5"
                           >
                             {h}
                           </th>
                         ))}
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-blue-500 border-b border-white/5">
                           Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-white/5">
                       {activeHoldings.map((item) => (
                         <tr
                           key={item.companyTicker}
-                          className="border-b border-slate-800 hover:bg-white/5"
+                          className="hover:bg-white/5 transition-colors group"
                         >
-                          <td className="px-4 py-3 text-sm font-medium">
+                          <td className="px-6 py-4 text-sm font-bold text-slate-200">
                             {item.companyTicker}
                           </td>
-                          <td className="px-4 py-3 text-sm">{item.shares}</td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-6 py-4 text-sm text-slate-400">{item.shares}</td>
+                          <td className="px-6 py-4 text-sm text-slate-400 font-mono">
                             {item.averageCost?.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-sm font-semibold text-blue-400">
-                            <div>
+                          <td className="px-6 py-4 text-sm">
+                            <div className="font-black text-blue-400">
                               {item.currentPrice != null ? (
                                 item.currentPrice.toFixed(2)
                               ) : (
-                                <span className="text-slate-500 text-xs">
-                                  Unavailable
-                                </span>
+                                <span className="text-slate-600">Unavailable</span>
                               )}
                             </div>
-                            <div className="text-[11px] font-normal text-slate-500">
+                            <div className="text-[9px] font-bold uppercase tracking-tighter text-slate-600 mt-0.5">
                               {item.hasOfficialPrice
                                 ? "CSE snapshot"
-                                : "Using cost basis"}
+                                : "Estimated"}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-6 py-4 text-sm font-black text-slate-200 font-mono">
                             {item.currentValue?.toFixed(2)}
                           </td>
-                          <td
-                            className={`px-4 py-3 text-sm font-semibold ${(item.gainLossPercent || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
-                          >
-                            {(item.gainLossPercent || 0) >= 0 ? "+" : ""}
-                            {item.gainLossPercent?.toFixed(2)}%
+                          <td className={`px-6 py-4 text-sm`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-black ${(item.gainLossPercent || 0) >= 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                              {(item.gainLossPercent || 0) >= 0 ? "+" : ""}
+                              {item.gainLossPercent?.toFixed(2)}%
+                            </span>
                           </td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-6 py-4 text-sm">
                             <button
                               onClick={() =>
                                 handleRemoveHolding(item.companyTicker)
                               }
-                              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-xs"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded-lg hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest"
                             >
                               Remove
                             </button>
@@ -644,24 +656,27 @@ const Portfolio = () => {
 
         {/* Holdings Allocation Chart */}
         {activeHoldings.length > 0 && (
-          <div className="card mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6">
-              Holdings Allocation
+          <div className="card mb-8 animate-fadeIn">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <span className="text-xl">📊</span> Holdings Allocation
             </h2>
-            <Bar data={holdingsChartData} options={holdingsChartOptions} />
+            <div className="p-4 bg-slate-900/30 rounded-2xl border border-white/5">
+              <Bar data={holdingsChartData} options={holdingsChartOptions} />
+            </div>
           </div>
         )}
 
         {/* Watchlist Section */}
-        <div className="card mb-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Watchlist</h2>
-          <p className="mb-4 text-sm text-slate-400">
-            Last watchlist update:{" "}
-            {formatSnapshotTime(watchlistSnapshotMeta.pricesUpdatedAt)}
-            {watchlistSnapshotMeta.priceStale
-              ? " • showing latest stored official CSE prices"
-              : ""}
-          </p>
+        <div className="card mb-8 animate-fadeIn">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <span className="text-xl">⭐</span> Watchlist
+            </h2>
+            <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-900/50 px-3 py-1.5 rounded-full border border-white/5">
+              Last update: {formatSnapshotTime(watchlistSnapshotMeta.pricesUpdatedAt)}
+              {watchlistSnapshotMeta.priceStale ? " • STALE" : ""}
+            </div>
+          </div>
 
           <form onSubmit={handleAddToWatchlist} className="flex gap-4 mb-6">
             <input
@@ -683,70 +698,72 @@ const Portfolio = () => {
           )}
 
           {loadingWatchlist ? (
-            <p className="text-gray-500 text-center py-4">
-              Loading watchlist...
-            </p>
+            <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+              <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading watchlist...</p>
+            </div>
           ) : watchlistItems.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">
-              Your watchlist is empty. Add stocks to monitor.
-            </p>
+            <div className="text-center py-16 bg-slate-900/20 rounded-2xl border border-dashed border-slate-700">
+              <p className="text-slate-500 font-medium whitespace-pre-wrap">Your watchlist is empty.{"\n"}Add stocks to monitor.</p>
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto rounded-xl border border-white/5">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-900/50">
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
-                      Company
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
-                      Current Price (LKR)
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
-                      Change (%)
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
+                  <tr className="bg-slate-900/80">
+                    {[
+                      "Company",
+                      "Current Price",
+                      "Change (%)",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-blue-500 border-b border-white/5"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-blue-500 border-b border-white/5">
                       Action
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-white/5">
                   {watchlistItems.map((item) => (
                     <tr
                       key={item.symbol}
-                      className="border-b border-gray-200 hover:bg-gray-50"
+                      className="hover:bg-white/5 transition-colors group"
                     >
-                      <td className="px-4 py-3 text-sm font-medium">
+                      <td className="px-6 py-4 text-sm font-bold text-slate-200">
                         {item.symbol}
                       </td>
-                      <td className="px-4 py-3 text-sm">
-                        <div>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="font-black text-blue-400">
                           {item.currentPrice != null ? (
                             item.currentPrice.toFixed(2)
                           ) : (
-                            <span className="text-gray-400 text-xs">
-                              Unavailable
-                            </span>
+                            <span className="text-slate-600">Unavailable</span>
                           )}
                         </div>
-                        <div className="text-[11px] text-slate-500">
+                        <div className="text-[9px] font-bold uppercase tracking-tighter text-slate-600 mt-0.5">
                           {item.priceSource === "cse"
                             ? "CSE snapshot"
                             : item.priceSource === "db-cache"
-                              ? "Stored CSE snapshot"
-                              : "No CSE quote"}
+                              ? "Cached"
+                              : "No quote"}
                         </div>
                       </td>
-                      <td
-                        className={`px-4 py-3 text-sm font-semibold ${(item.changePercentage || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {item.changePercentage != null
-                          ? `${item.changePercentage >= 0 ? "+" : ""}${Number(item.changePercentage).toFixed(2)}%`
-                          : "—"}
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-3 py-1 rounded-full text-xs font-black ${item.changePercentage >= 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                          {item.changePercentage != null
+                            ? `${item.changePercentage >= 0 ? "+" : ""}${Number(item.changePercentage).toFixed(2)}%`
+                            : "—"}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td className="px-6 py-4 text-sm">
                         <button
                           onClick={() => handleRemoveFromWatchlist(item.symbol)}
-                          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-xs"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded-lg hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest"
                         >
                           Remove
                         </button>

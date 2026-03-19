@@ -72,40 +72,47 @@ const ValuationModels = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100 animate-fadeIn">
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-12 text-center mb-8 backdrop-blur-sm">
-          <h1 className="text-4xl font-bold mb-4">Valuation Models Reference</h1>
-          <p className="text-lg opacity-90 text-blue-100">Learn about different stock valuation methods and financial ratios</p>
+        <div className="premium-gradient p-12 rounded-3xl text-center mb-12 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <h1 className="text-4xl font-extrabold mb-4 tracking-tight drop-shadow-md">Valuation Models Reference</h1>
+          <p className="text-lg text-blue-100/90 font-medium max-w-2xl mx-auto">Master the key stock valuation methods and financial ratios used by professional analysts</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {models.map((model, index) => (
-            <div key={index} className="card hover:scale-[1.02] transition-all hover:shadow-blue-500/10 hover:shadow-2xl">
-              <h3 className="text-xl font-bold text-blue-400 mb-4">{model.title}</h3>
+            <div key={index} className="glass-card p-8 rounded-3xl flex flex-col hover:scale-[1.02] hover:glow-blue transition-all duration-500 animate-slideUp" style={{ animationDelay: `${index * 100}ms` }}>
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="text-xl font-black text-white leading-tight">{model.title}</h3>
+                <span className="text-2xl opacity-50 group-hover:opacity-100 transition-opacity">📐</span>
+              </div>
               
-              <div className="bg-slate-900/50 border-l-4 border-blue-500 p-4 rounded-lg mb-4 font-mono text-sm text-blue-200">
+              <div className="bg-slate-900/80 border border-blue-500/20 p-5 rounded-2xl mb-6 font-mono text-sm text-blue-400 text-center shadow-inner group-hover:border-blue-500/40 transition-colors">
                 {model.formula}
               </div>
               
-              <p className="text-slate-400 mb-4 text-sm leading-relaxed">{model.description}</p>
+              <p className="text-slate-400 mb-6 text-sm leading-relaxed flex-grow">{model.description}</p>
               
-              <div className="bg-slate-900/30 border border-slate-700/50 p-4 rounded-lg mb-4">
-                <strong className="text-sm font-semibold text-slate-200 block mb-3">Key Components:</strong>
-                <ul className="space-y-2">
+              <div className="bg-white/5 rounded-2xl p-5 mb-8 border border-white/5 transition-colors hover:bg-white/[0.07]">
+                <strong className="text-[10px] font-black uppercase tracking-widest text-blue-500 block mb-4">Key Components</strong>
+                <ul className="space-y-3">
                   {model.components.map((comp, idx) => (
-                    <li key={idx} className="text-sm">
-                      <strong className="text-blue-400">{comp.label}:</strong>{' '}
-                      <span className="text-slate-300">{comp.desc}</span>
+                    <li key={idx} className="text-xs flex items-center gap-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500/40 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                      <div>
+                        <span className="font-bold text-slate-200 mr-2">{comp.label}:</span>
+                        <span className="text-slate-400">{comp.desc}</span>
+                      </div>
                     </li>
                   ))}
                 </ul>
               </div>
               
               {model.link && (
-                <Link to={model.link} className="btn btn-primary w-full text-center">
+                <Link to={model.link} className="btn btn-primary w-full text-center py-4 rounded-xl shadow-lg shadow-blue-600/10 group-hover:shadow-blue-600/20">
                   {model.linkText}
                 </Link>
               )}
