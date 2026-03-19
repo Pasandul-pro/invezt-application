@@ -56,13 +56,13 @@
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-md p-6 text-slate-900 transition-all 
+    @apply bg-[#1e293b] rounded-xl shadow-md p-6 text-slate-100 border border-slate-700/50 transition-all 
            duration-300 hover:shadow-xl hover:-translate-y-1;
   }
   
   .input {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900
-           placeholder:text-gray-400
+    @apply w-full px-4 py-3 bg-[#0f172a] border border-slate-700 rounded-lg text-slate-100
+           placeholder:text-slate-500
            focus:outline-none focus:ring-2 focus:ring-blue-600 
            focus:border-transparent transition-all;
   }

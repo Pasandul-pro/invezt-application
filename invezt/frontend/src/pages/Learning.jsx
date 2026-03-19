@@ -82,7 +82,7 @@ const Learning = () => {
     ];
 
     return (
-        <div className="min-h-screen pb-20 animate-fadeIn">
+        <div className="min-h-screen bg-[#0f172a] pb-20 animate-fadeIn">
             <Header />
             {/* Hero Section */}
             <header className="relative overflow-hidden border-b border-slate-800 bg-slate-950/40">

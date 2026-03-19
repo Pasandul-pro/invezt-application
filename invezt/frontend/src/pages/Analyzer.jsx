@@ -209,9 +209,9 @@ const Analyzer = () => {
   };
 
   const getRatingClass = (rating) => {
-    if (rating >= 4.5) return "bg-green-50 border-l-4 border-r-4 border-green-500";
-    if (rating >= 3.5) return "bg-blue-50 border-l-4 border-r-4 border-blue-500";
-    return "bg-red-50 border-l-4 border-r-4 border-red-500";
+    if (rating >= 4.5) return "bg-green-900/20 border-l-4 border-r-4 border-green-500/50";
+    if (rating >= 3.5) return "bg-blue-900/20 border-l-4 border-r-4 border-blue-500/50";
+    return "bg-red-900/20 border-l-4 border-r-4 border-red-500/50";
   };
 
   const analyzedPrice = normalizeNumber(analyzedStock?.currentPrice);
@@ -226,10 +226,10 @@ const Analyzer = () => {
     : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-8 mb-8">
+        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-8 mb-8 backdrop-blur-sm">
           <h2 className="text-3xl font-bold mb-4">Stock Analysis</h2>
           <form onSubmit={handleAnalyze} className="flex flex-wrap gap-4 mb-4">
             <input
@@ -237,12 +237,12 @@ const Analyzer = () => {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Enter ticker (e.g. JKH.N0000) or company name"
-              className="flex-1 min-w-[320px] px-4 py-3 rounded-lg text-gray-900"
+              className="flex-1 min-w-[320px] px-4 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             <button
               type="submit"
               disabled={analyzing}
-              className="btn bg-primary-dark text-white hover:bg-primary disabled:opacity-60"
+              className="btn btn-primary bg-blue-600 hover:bg-blue-500 disabled:opacity-60"
             >
               {analyzing ? "Analyzing..." : "Analyze Stock"}
             </button>
@@ -251,14 +251,14 @@ const Analyzer = () => {
             Enter any CSE ticker (e.g. JKH.N0000, COMB.N0000, HNB.N0000) to load financial ratios.
           </p>
           {error && (
-            <div className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mt-4 rounded-lg border border-red-500/30 bg-red-900/20 px-4 py-3 text-sm text-red-300">
               {error}
             </div>
           )}
         </div>
 
         {analyzedStock && (
-          <div className="card mb-6 bg-secondary text-white">
+          <div className="card mb-6 bg-blue-900/20 border-blue-500/30 text-white">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>
                 <h3 className="text-2xl font-bold mb-1">
@@ -270,33 +270,33 @@ const Analyzer = () => {
               </div>
               <button
                 onClick={() => { setAnalyzedStock(null); setError(""); }}
-                className="self-start rounded-lg border border-white/30 px-3 py-2 text-sm hover:bg-white/10"
+                className="self-start rounded-lg border border-white/20 px-3 py-2 text-sm hover:bg-white/10 text-white transition-colors"
               >
                 Clear analysis
               </button>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-6 md:grid-cols-4">
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Current Price</div>
-                <div className="text-xl font-bold text-primary">
+              <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-4 text-slate-100">
+                <div className="text-sm text-slate-400 mb-1">Current Price</div>
+                <div className="text-xl font-bold text-blue-400">
                   {analyzedPrice != null ? `LKR ${analyzedPrice.toFixed(2)}` : "N/A"}
                 </div>
               </div>
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Market Cap</div>
-                <div className="text-xl font-bold text-primary">
+              <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-4 text-slate-100">
+                <div className="text-sm text-slate-400 mb-1">Market Cap</div>
+                <div className="text-xl font-bold text-blue-400">
                   {analyzedStock.marketCap || "N/A"}
                 </div>
               </div>
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Volume</div>
-                <div className="text-xl font-bold text-primary">
+              <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-4 text-slate-100">
+                <div className="text-sm text-slate-400 mb-1">Volume</div>
+                <div className="text-xl font-bold text-blue-400">
                   {analyzedStock.volume != null ? Number(analyzedStock.volume).toLocaleString() : "N/A"}
                 </div>
               </div>
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Price Change</div>
-                <div className={`text-xl font-bold ${(normalizeNumber(analyzedStock.change) ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <div className="bg-slate-900/50 border border-slate-700/50 rounded-lg p-4 text-slate-100">
+                <div className="text-sm text-slate-400 mb-1">Price Change</div>
+                <div className={`text-xl font-bold ${(normalizeNumber(analyzedStock.change) ?? 0) >= 0 ? "text-green-400" : "text-red-400"}`}>
                   {(normalizeNumber(analyzedStock.change) ?? 0) >= 0 ? "+" : ""}
                   {(normalizeNumber(analyzedStock.change) ?? 0).toFixed(2)}%
                 </div>
@@ -306,7 +306,7 @@ const Analyzer = () => {
         )}
 
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-bold text-primary border-b-2 border-gray-200 pb-3">
+          <h3 className="text-2xl font-bold text-white border-b-2 border-slate-800 pb-3">
             Key Financial Ratios
           </h3>
           {analyzedStock && (
@@ -317,7 +317,7 @@ const Analyzer = () => {
         </div>
 
         {!analyzedStock && (
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-slate-500 mb-4">
             Enter a CSE ticker above and click &quot;Analyze Stock&quot; to load financial ratios.
           </p>
         )}
@@ -327,34 +327,34 @@ const Analyzer = () => {
             const rawValue = analyzedStock?.ratios?.[ratio.key];
             const displayValue = formatRatioValue(rawValue, ratio.format);
             const health = getRatioHealth(ratio, rawValue);
-            const cardClass =
+            const cardClass = 
               health === "good"
-                ? "bg-green-50 border-l-4 border-r-4 border-green-500"
+                ? "bg-green-900/20 border-l-4 border-r-4 border-green-500/50"
                 : health === "caution"
-                  ? "bg-red-50 border-l-4 border-r-4 border-red-500"
+                  ? "bg-red-900/20 border-l-4 border-r-4 border-red-500/50"
                   : getRatingClass(ratio.rating);
 
             return (
               <div key={index} className={`card ${cardClass}`}>
                 <div className="text-center">
-                  <h4 className="font-semibold text-gray-800 mb-2 text-lg">
+                  <h4 className="font-semibold text-white mb-2 text-lg">
                     {ratio.name}
                   </h4>
                   {displayValue ? (
-                    <div className={`text-2xl font-bold mb-2 ${health === "good" ? "text-green-600" : "text-red-600"}`}>
+                    <div className={`text-2xl font-bold mb-2 ${health === "good" ? "text-green-400" : "text-red-400"}`}>
                       {displayValue}
                       <span className="ml-2 text-sm">
                         {health === "good" ? "✓" : "⚠"}
                       </span>
                     </div>
                   ) : (
-                    <div className="text-gray-400 text-sm mb-2 italic">
+                    <div className="text-slate-500 text-sm mb-2 italic">
                       {analyzedStock ? "Data unavailable" : "Search a stock above"}
                     </div>
                   )}
                   <div className="text-xl mb-2">{renderStars(ratio.rating)}</div>
-                  <p className="text-sm text-gray-700 font-medium">{ratio.meaning}</p>
-                  <p className="text-xs text-gray-400 mt-1">{ratio.benchmark}</p>
+                  <p className="text-sm text-slate-300 font-medium">{ratio.meaning}</p>
+                  <p className="text-xs text-slate-500 mt-1">{ratio.benchmark}</p>
                 </div>
               </div>
             );

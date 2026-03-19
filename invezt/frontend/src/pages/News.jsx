@@ -65,12 +65,12 @@ const News = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-slate-900">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-12 text-center mb-8">
+        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-12 text-center mb-8 backdrop-blur-sm">
           <h1 className="text-4xl font-bold mb-4">Latest Market News</h1>
-          <p className="text-lg opacity-90">Real-time market news from CSE and Sri Lanka financial markets</p>
+          <p className="text-lg opacity-90 text-blue-100">Real-time market news from CSE and Sri Lanka financial markets</p>
         </div>
 
         {/* Search bar */}
@@ -82,11 +82,11 @@ const News = () => {
             placeholder="Search news (e.g. JKH, CSE, banking sector)..."
             className="input flex-1"
           />
-          <button type="submit" className="btn btn-primary">Search</button>
+          <button type="submit" className="btn btn-primary bg-blue-600 hover:bg-blue-500">Search</button>
           <button
             type="button"
             onClick={() => setSearchQuery('Colombo Stock Exchange CSE Sri Lanka')}
-            className="btn bg-gray-500 text-white hover:bg-gray-600"
+            className="btn bg-slate-700 text-white hover:bg-slate-600"
           >
             Reset
           </button>
@@ -102,7 +102,7 @@ const News = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.slice(0, 12).map((article, idx) => (
-              <div key={idx} className="card hover:scale-105 transition-transform flex flex-col">
+              <div key={idx} className="card hover:scale-[1.02] transition-all hover:shadow-blue-500/10 hover:shadow-2xl flex flex-col">
                 {article.urlToImage && (
                   <img
                     src={article.urlToImage}
@@ -111,20 +111,20 @@ const News = () => {
                     onError={e => { e.target.style.display = 'none'; }}
                   />
                 )}
-                <h3 className="text-lg font-semibold text-primary mb-2 line-clamp-2">{article.title}</h3>
-                <div className="bg-gray-50 border-l-4 border-primary-light px-3 py-1 rounded mb-3">
-                  <span className="text-xs text-gray-600 font-mono">
+                <h3 className="text-lg font-semibold text-blue-400 mb-2 line-clamp-2">{article.title}</h3>
+                <div className="bg-slate-900/50 border-l-4 border-blue-500 px-3 py-1 rounded mb-3">
+                  <span className="text-xs text-slate-500 font-mono">
                     {article.source?.name} · {new Date(article.publishedAt).toLocaleDateString()}
                   </span>
                 </div>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-3 flex-grow">
+                <p className="text-slate-400 text-sm mb-3 line-clamp-3 flex-grow">
                   {article.description || 'No description available.'}
                 </p>
                 <a
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-primary text-sm text-center mt-auto"
+                  className="btn btn-primary bg-blue-600 hover:bg-blue-500 text-sm text-center mt-auto"
                 >
                   Read More
                 </a>

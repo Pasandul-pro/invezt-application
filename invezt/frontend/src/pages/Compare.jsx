@@ -73,12 +73,12 @@ const Compare = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-slate-900">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-12 text-center mb-8">
+        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-12 text-center mb-8 backdrop-blur-sm">
           <h1 className="text-4xl font-bold mb-4">Company Comparison</h1>
-          <p className="text-lg opacity-90">
+          <p className="text-lg opacity-90 text-blue-100">
             Compare up to 3 CSE-listed companies with live financial data + AI
             insights
           </p>
@@ -86,13 +86,13 @@ const Compare = () => {
 
         {/* Selection form */}
         <div className="card mb-8">
-          <h2 className="text-2xl font-bold text-primary mb-6">
+          <h2 className="text-2xl font-bold text-white mb-6">
             Select Companies to Compare
           </h2>
           <div className="grid md:grid-cols-4 gap-4 mb-6">
             {[0, 1, 2].map((i) => (
               <div key={i}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
                   Company {i + 1}
                 </label>
                 <input
@@ -109,7 +109,7 @@ const Compare = () => {
               </div>
             ))}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Fiscal Year
               </label>
               <input
@@ -125,12 +125,12 @@ const Compare = () => {
           <button
             onClick={handleCompare}
             disabled={loading}
-            className="btn btn-primary"
+            className="btn btn-primary bg-blue-600 hover:bg-blue-500"
           >
             {loading ? "Comparing..." : "Compare Companies"}
           </button>
           {error && (
-            <div className="mt-4 bg-red-50 border-l-4 border-red-500 p-3 rounded text-red-700 text-sm">
+            <div className="mt-4 bg-red-900/20 border-l-4 border-red-500 p-3 rounded text-red-300 text-sm">
               {error}
             </div>
           )}
@@ -140,7 +140,7 @@ const Compare = () => {
         {result && (
           <>
             <div className="card mb-8">
-              <h2 className="text-2xl font-bold text-primary mb-6">
+              <h2 className="text-2xl font-bold text-white mb-6">
                 Comparison Results – {year}
               </h2>
 
@@ -151,13 +151,13 @@ const Compare = () => {
                   gridTemplateColumns: `repeat(${companies.length + 1}, 1fr)`,
                 }}
               >
-                <div className="font-semibold text-gray-700">
+                <div className="font-semibold text-slate-400">
                   Live Price (LKR)
                 </div>
                 {companies.map((c) => (
                   <div
                     key={c.symbol}
-                    className="font-bold text-primary text-lg"
+                    className="font-bold text-blue-400 text-lg"
                   >
                     {c.missing
                       ? "—"
@@ -171,14 +171,15 @@ const Compare = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-primary">
+                  <thead>
+                    <tr className="bg-slate-900/50">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-blue-400">
                         Financial Ratio
                       </th>
                       {companies.map((c) => (
                         <th
                           key={c.symbol}
-                          className="px-6 py-4 text-left text-sm font-semibold text-primary"
+                          className="px-6 py-4 text-left text-sm font-semibold text-blue-400"
                         >
                           {c.symbol}
                           {c.missing && (
@@ -189,6 +190,7 @@ const Compare = () => {
                         </th>
                       ))}
                     </tr>
+                  </thead>
                   </thead>
                   <tbody>
                     {ratioRows.map((row, idx) => {
@@ -205,9 +207,9 @@ const Compare = () => {
                       return (
                         <tr
                           key={idx}
-                          className="border-b border-gray-200 hover:bg-gray-50"
+                          className="border-b border-slate-800 hover:bg-white/5"
                         >
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                          <td className="px-6 py-4 text-sm font-medium text-slate-100">
                             {row.label}
                           </td>
                           {companies.map((c, cIdx) => {
@@ -219,15 +221,15 @@ const Compare = () => {
                                 key={c.symbol}
                                 className={`px-6 py-4 text-sm font-semibold ${
                                   isBest
-                                    ? "text-green-700 bg-green-50"
+                                    ? "text-green-400 bg-green-900/20"
                                     : isWorst
-                                      ? "text-red-700 bg-red-50"
-                                      : "text-gray-700"
+                                      ? "text-red-400 bg-red-900/20"
+                                      : "text-slate-300"
                                 }`}
                               >
                                 {c.missing ? "—" : val != null ? val : "N/A"}
                                 {isBest && (
-                                  <span className="ml-1 text-xs font-bold text-green-600">
+                                  <span className="ml-1 text-xs font-bold text-green-500">
                                     ▲
                                   </span>
                                 )}
@@ -245,13 +247,13 @@ const Compare = () => {
                   </tbody>
                 </table>
               </div>
-              <div className="mt-4 flex gap-6 text-xs text-gray-500">
+              <div className="mt-4 flex gap-6 text-xs text-slate-500">
                 <span className="flex items-center gap-1">
-                  <span className="inline-block w-3 h-3 rounded bg-green-100 border border-green-400"></span>{" "}
+                  <span className="inline-block w-3 h-3 rounded bg-green-900/30 border border-green-500/50"></span>{" "}
                   Best value for this ratio
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="inline-block w-3 h-3 rounded bg-red-100 border border-red-400"></span>{" "}
+                  <span className="inline-block w-3 h-3 rounded bg-red-900/30 border border-red-500/50"></span>{" "}
                   Weakest value for this ratio
                 </span>
               </div>
@@ -260,23 +262,23 @@ const Compare = () => {
             {/* AI Insights */}
             {result.aiInsights && (
               <div className="card">
-                <h2 className="text-2xl font-bold text-primary mb-4">
+                <h2 className="text-2xl font-bold text-white mb-4">
                   🤖 AI Investment Insights
                 </h2>
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-lg">
-                  <pre className="whitespace-pre-wrap text-gray-800 text-sm leading-relaxed font-sans">
+                <div className="bg-blue-900/20 border-l-4 border-blue-500 p-6 rounded-lg">
+                  <pre className="whitespace-pre-wrap text-slate-200 text-sm leading-relaxed font-sans">
                     {result.aiInsights}
                   </pre>
                 </div>
-                <p className="text-xs text-gray-400 mt-3">
+                <p className="text-xs text-slate-500 mt-3">
                   Powered by GPT-4o · Based on {year} annual financials
                 </p>
               </div>
             )}
 
             {!result.aiInsights && companies.some((c) => !c.missing) && (
-              <div className="card bg-yellow-50 border-l-4 border-yellow-400">
-                <p className="text-yellow-800 text-sm">
+              <div className="card bg-yellow-900/20 border-l-4 border-yellow-500">
+                <p className="text-yellow-200 text-sm">
                   ⚠ AI insights unavailable — financial data for these companies
                   may not yet be in the database. The live CSE prices and ratios
                   above are calculated from available data.

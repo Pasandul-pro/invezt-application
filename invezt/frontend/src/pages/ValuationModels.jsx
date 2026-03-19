@@ -72,33 +72,33 @@ const ValuationModels = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-slate-900">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100">
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-12 text-center mb-8">
+        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-12 text-center mb-8 backdrop-blur-sm">
           <h1 className="text-4xl font-bold mb-4">Valuation Models Reference</h1>
-          <p className="text-lg opacity-90">Learn about different stock valuation methods and financial ratios</p>
+          <p className="text-lg opacity-90 text-blue-100">Learn about different stock valuation methods and financial ratios</p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {models.map((model, index) => (
-            <div key={index} className="card hover:scale-105 transition-transform">
-              <h3 className="text-xl font-bold text-primary mb-4">{model.title}</h3>
+            <div key={index} className="card hover:scale-[1.02] transition-all hover:shadow-blue-500/10 hover:shadow-2xl">
+              <h3 className="text-xl font-bold text-blue-400 mb-4">{model.title}</h3>
               
-              <div className="bg-gray-50 border-l-4 border-primary-light p-4 rounded-lg mb-4 font-mono text-sm">
+              <div className="bg-slate-900/50 border-l-4 border-blue-500 p-4 rounded-lg mb-4 font-mono text-sm text-blue-200">
                 {model.formula}
               </div>
               
-              <p className="text-gray-600 mb-4 text-sm leading-relaxed">{model.description}</p>
+              <p className="text-slate-400 mb-4 text-sm leading-relaxed">{model.description}</p>
               
-              <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                <strong className="text-sm font-semibold text-gray-800 block mb-3">Key Components:</strong>
+              <div className="bg-slate-900/30 border border-slate-700/50 p-4 rounded-lg mb-4">
+                <strong className="text-sm font-semibold text-slate-200 block mb-3">Key Components:</strong>
                 <ul className="space-y-2">
                   {model.components.map((comp, idx) => (
                     <li key={idx} className="text-sm">
-                      <strong className="text-primary">{comp.label}:</strong>{' '}
-                      <span className="text-gray-700">{comp.desc}</span>
+                      <strong className="text-blue-400">{comp.label}:</strong>{' '}
+                      <span className="text-slate-300">{comp.desc}</span>
                     </li>
                   ))}
                 </ul>

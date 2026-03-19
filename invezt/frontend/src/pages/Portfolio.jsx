@@ -277,18 +277,18 @@ const Portfolio = () => {
       {
         label: "Portfolio Value (LKR)",
         data: growthValues,
-        borderColor: "#1e3a8a",
-        backgroundColor: "rgba(59, 130, 246, 0.15)",
+        borderColor: "#60a5fa",
+        backgroundColor: "rgba(96, 165, 250, 0.15)",
         fill: true,
         tension: 0.4,
         pointRadius: 4,
-        pointBackgroundColor: "#1e3a8a",
+        pointBackgroundColor: "#60a5fa",
         pointHoverRadius: 6,
       },
       {
         label: "Total Investment (LKR)",
         data: growthInvestments,
-        borderColor: "rgba(15, 23, 42, 0.6)",
+        borderColor: "rgba(148, 163, 184, 0.6)",
         borderDash: [6, 6],
         fill: false,
         tension: 0.2,
@@ -311,12 +311,18 @@ const Portfolio = () => {
     scales: {
       y: {
         beginAtZero: false,
-        title: { display: true, text: "Portfolio Value (LKR)" },
+        title: { display: true, text: "Portfolio Value (LKR)", color: "#94a3b8" },
         ticks: {
+          color: "#94a3b8",
           callback: (v) => `LKR ${Number(v).toLocaleString("en-LK")}`,
         },
+        grid: { color: "rgba(51, 65, 85, 0.5)" },
       },
-      x: { title: { display: true, text: "Snapshot Time" } },
+      x: { 
+        title: { display: true, text: "Snapshot Time", color: "#94a3b8" },
+        ticks: { color: "#94a3b8" },
+        grid: { display: false }
+      },
     },
   };
 
@@ -342,31 +348,45 @@ const Portfolio = () => {
 
   const holdingsChartOptions = {
     responsive: true,
-    plugins: { legend: { position: "top" } },
+    plugins: { 
+      legend: { 
+        position: "top",
+        labels: { color: "#94a3b8" }
+      } 
+    },
     scales: {
-      y: { beginAtZero: true, title: { display: true, text: "Value (LKR)" } },
-      x: { title: { display: true, text: "Stock" } },
+      y: { 
+        beginAtZero: true, 
+        title: { display: true, text: "Value (LKR)", color: "#94a3b8" },
+        ticks: { color: "#94a3b8" },
+        grid: { color: "rgba(51, 65, 85, 0.5)" }
+      },
+      x: { 
+        title: { display: true, text: "Stock", color: "#94a3b8" },
+        ticks: { color: "#94a3b8" },
+        grid: { display: false }
+      },
     },
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-slate-900">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100">
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-12 text-center mb-8">
+        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-12 text-center mb-8 backdrop-blur-sm">
           <h1 className="text-4xl font-bold mb-4">Portfolio &amp; Watchlist</h1>
-          <p className="text-lg opacity-90">
+          <p className="text-lg opacity-90 text-blue-100">
             Track your CSE investments with official Colombo Stock Exchange
             snapshots refreshed every 10 minutes
           </p>
         </div>
 
-        <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm text-blue-900">
-          <div className="font-semibold">
+        <div className="mb-6 rounded-2xl border border-blue-500/30 bg-blue-900/20 px-5 py-4 text-sm text-blue-100 backdrop-blur-sm">
+          <div className="font-semibold text-blue-300">
             Portfolio prices use the latest CSE snapshot.
           </div>
-          <div className="mt-1">
+          <div className="mt-1 text-slate-400">
             Last update:{" "}
             {formatSnapshotTime(portfolioSnapshotMeta.pricesUpdatedAt)}
             {portfolioSnapshotMeta.priceStale
@@ -399,10 +419,10 @@ const Portfolio = () => {
                   totalGainLossPercent >= 0 ? "text-green-600" : "text-red-600",
               },
             ].map((card, i) => (
-              <div key={i} className="card text-center">
-                <p className="text-sm text-gray-500 mb-1">{card.label}</p>
+              <div key={i} className="card text-center border-slate-700/50">
+                <p className="text-sm text-slate-400 mb-1">{card.label}</p>
                 <p
-                  className={`text-xl font-bold ${card.color || "text-primary"}`}
+                  className={`text-xl font-bold ${card.color || "text-blue-400"}`}
                 >
                   {card.value}
                 </p>
@@ -414,10 +434,10 @@ const Portfolio = () => {
         {/* Portfolio Growth Over Time Chart */}
         {activeHoldings.length > 0 && (
           <div className="card mb-8">
-            <h2 className="text-2xl font-bold text-primary mb-2">
+            <h2 className="text-2xl font-bold text-white mb-2">
               Portfolio Growth Over Time
             </h2>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-slate-400 mb-6">
               Real portfolio tracking from saved 10-minute CSE snapshots
             </p>
             {hasTrackedHistory ? (
@@ -432,7 +452,7 @@ const Portfolio = () => {
                 </p>
               </>
             ) : (
-              <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-sm text-slate-600">
+              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/50 px-5 py-8 text-sm text-slate-400">
                 Real portfolio tracking has started. The first CSE snapshot will
                 appear here, and the chart will build over time every 10
                 minutes.
@@ -444,11 +464,11 @@ const Portfolio = () => {
         {/* Portfolio Section */}
         <div className="card mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-primary">My Portfolio</h2>
+            <h2 className="text-2xl font-bold text-white">My Portfolio</h2>
             {portfolios.length === 0 && !loadingPortfolio && (
               <button
                 onClick={handleCreatePortfolio}
-                className="btn btn-primary"
+                className="btn btn-primary bg-blue-600 hover:bg-blue-500"
               >
                 + Create Portfolio
               </button>
@@ -525,7 +545,7 @@ const Portfolio = () => {
                   />
                   <button
                     type="submit"
-                    className="btn btn-primary"
+                    className="btn btn-primary bg-blue-600 hover:bg-blue-500"
                     disabled={addingHolding}
                   >
                     {addingHolding ? "Adding..." : "Add to Portfolio"}
@@ -543,7 +563,7 @@ const Portfolio = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-gray-50">
+                      <tr className="bg-slate-900/50">
                         {[
                           "Company",
                           "Shares",
@@ -554,12 +574,12 @@ const Portfolio = () => {
                         ].map((h) => (
                           <th
                             key={h}
-                            className="px-4 py-3 text-left text-sm font-semibold text-primary"
+                            className="px-4 py-3 text-left text-sm font-semibold text-blue-400"
                           >
                             {h}
                           </th>
                         ))}
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-primary">
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
                           Action
                         </th>
                       </tr>
@@ -568,7 +588,7 @@ const Portfolio = () => {
                       {activeHoldings.map((item) => (
                         <tr
                           key={item.companyTicker}
-                          className="border-b border-gray-200 hover:bg-gray-50"
+                          className="border-b border-slate-800 hover:bg-white/5"
                         >
                           <td className="px-4 py-3 text-sm font-medium">
                             {item.companyTicker}
@@ -577,17 +597,17 @@ const Portfolio = () => {
                           <td className="px-4 py-3 text-sm">
                             {item.averageCost?.toFixed(2)}
                           </td>
-                          <td className="px-4 py-3 text-sm font-semibold text-primary">
+                          <td className="px-4 py-3 text-sm font-semibold text-blue-400">
                             <div>
                               {item.currentPrice != null ? (
                                 item.currentPrice.toFixed(2)
                               ) : (
-                                <span className="text-gray-400 text-xs">
+                                <span className="text-slate-500 text-xs">
                                   Unavailable
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] font-normal text-gray-400">
+                            <div className="text-[11px] font-normal text-slate-500">
                               {item.hasOfficialPrice
                                 ? "CSE snapshot"
                                 : "Using cost basis"}
@@ -625,7 +645,7 @@ const Portfolio = () => {
         {/* Holdings Allocation Chart */}
         {activeHoldings.length > 0 && (
           <div className="card mb-8">
-            <h2 className="text-2xl font-bold text-primary mb-6">
+            <h2 className="text-2xl font-bold text-white mb-6">
               Holdings Allocation
             </h2>
             <Bar data={holdingsChartData} options={holdingsChartOptions} />
@@ -634,8 +654,8 @@ const Portfolio = () => {
 
         {/* Watchlist Section */}
         <div className="card mb-8">
-          <h2 className="text-2xl font-bold text-primary mb-6">Watchlist</h2>
-          <p className="mb-4 text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-white mb-6">Watchlist</h2>
+          <p className="mb-4 text-sm text-slate-400">
             Last watchlist update:{" "}
             {formatSnapshotTime(watchlistSnapshotMeta.pricesUpdatedAt)}
             {watchlistSnapshotMeta.priceStale
@@ -651,7 +671,7 @@ const Portfolio = () => {
               placeholder="Add ticker to watchlist (e.g. HNB.N0000)"
               className="input flex-1"
             />
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary bg-blue-600 hover:bg-blue-500">
               Add to Watchlist
             </button>
           </form>
@@ -674,17 +694,17 @@ const Portfolio = () => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-primary">
+                  <tr className="bg-slate-900/50">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
                       Company
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-primary">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
                       Current Price (LKR)
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-primary">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
                       Change (%)
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-primary">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-blue-400">
                       Action
                     </th>
                   </tr>
@@ -708,7 +728,7 @@ const Portfolio = () => {
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-gray-400">
+                        <div className="text-[11px] text-slate-500">
                           {item.priceSource === "cse"
                             ? "CSE snapshot"
                             : item.priceSource === "db-cache"

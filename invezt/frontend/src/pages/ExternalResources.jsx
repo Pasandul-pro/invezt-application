@@ -90,6 +90,8 @@ const resourceCategories = [
     },
 ];
 
+import Header from '../components/layout/Header';
+
 const ExternalResources = () => {
     const [openUrls, setOpenUrls] = useState(new Set());
 
@@ -136,8 +138,9 @@ const ExternalResources = () => {
     }, [openUrls]);
 
     return (
-        <div className="min-h-screen px-4 py-10 animate-fadeIn">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-[#0f172a] pb-20 animate-fadeIn">
+            <Header />
+            <div className="max-w-7xl mx-auto px-4 py-10">
                 {/* Header */}
                 <div className="text-center mb-14">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
