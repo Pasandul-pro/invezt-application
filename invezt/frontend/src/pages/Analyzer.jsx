@@ -209,9 +209,9 @@ const Analyzer = () => {
   };
 
   const getRatingClass = (rating) => {
-    if (rating >= 4.5) return "bg-green-50 border-l-4 border-r-4 border-green-500";
-    if (rating >= 3.5) return "bg-blue-50 border-l-4 border-r-4 border-blue-500";
-    return "bg-red-50 border-l-4 border-r-4 border-red-500";
+    if (rating >= 4.5) return "bg-green-900/20 border-l-4 border-r-4 border-green-500/50";
+    if (rating >= 3.5) return "bg-blue-900/20 border-l-4 border-r-4 border-blue-500/50";
+    return "bg-red-900/20 border-l-4 border-r-4 border-red-500/50";
   };
 
   const analyzedPrice = normalizeNumber(analyzedStock?.currentPrice);
@@ -226,135 +226,149 @@ const Analyzer = () => {
     : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100 animate-fadeIn">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-8 mb-8">
-          <h2 className="text-3xl font-bold mb-4">Stock Analysis</h2>
-          <form onSubmit={handleAnalyze} className="flex flex-wrap gap-4 mb-4">
+        <div className="premium-gradient p-12 rounded-3xl text-center mb-12 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <h1 className="text-4xl font-extrabold mb-4 tracking-tight drop-shadow-md">Stock Analysis &amp; Ratios</h1>
+          <p className="text-lg text-blue-100/90 font-medium max-w-2xl mx-auto mb-8">
+            Deep dive into Colombo Stock Exchange financials with real-time valuation metrics
+          </p>
+          
+          <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-4 relative z-10">
             <input
               type="text"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Enter ticker (e.g. JKH.N0000) or company name"
-              className="flex-1 min-w-[320px] px-4 py-3 rounded-lg text-gray-900"
+              placeholder="e.g. JKH.N0000 or Commercial Bank"
+              className="flex-1 px-6 py-4 rounded-2xl bg-white/10 border border-white/10 text-white placeholder:text-blue-100/50 backdrop-blur-md focus:ring-2 focus:ring-white/20 focus:outline-none transition-all"
             />
             <button
               type="submit"
               disabled={analyzing}
-              className="btn bg-primary-dark text-white hover:bg-primary disabled:opacity-60"
+              className="btn bg-white text-blue-900 hover:bg-blue-50 font-black px-8 py-4 rounded-2xl shadow-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {analyzing ? "Analyzing..." : "Analyze Stock"}
+              {analyzing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-blue-900/30 border-t-blue-900 rounded-full animate-spin"></div>
+                  Analyzing...
+                </>
+              ) : "Analyze Stock"}
             </button>
           </form>
-          <p className="text-sm opacity-90">
-            Enter any CSE ticker (e.g. JKH.N0000, COMB.N0000, HNB.N0000) to load financial ratios.
-          </p>
+          
           {error && (
-            <div className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+            <div className="mt-6 inline-block bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-xl text-red-200 text-xs font-bold animate-shake">
+              ⚠️ {error}
             </div>
           )}
         </div>
 
         {analyzedStock && (
-          <div className="card mb-6 bg-secondary text-white">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div>
-                <h3 className="text-2xl font-bold mb-1">
-                  {analyzedStock.companyName} ({analyzedStock.ticker})
-                </h3>
-                <p className="text-sm text-white/80">
-                  {analyzedStock.sector || "CSE Listed"}
-                </p>
+          <div className="glass-card p-10 rounded-3xl mb-12 animate-slideUp">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
+              <div className="flex items-center gap-6">
+                <div className="w-20 h-20 rounded-2xl bg-blue-600 flex items-center justify-center text-3xl shadow-lg shadow-blue-600/30">
+                  {analyzedStock.ticker?.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black text-white mb-2">
+                    {analyzedStock.companyName}
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full text-[10px] font-black uppercase tracking-widest text-blue-400">
+                      {analyzedStock.ticker}
+                    </span>
+                    <span className="text-slate-500 font-bold text-xs uppercase tracking-widest">
+                      {analyzedStock.sector || "CSE Listed"}
+                    </span>
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => { setAnalyzedStock(null); setError(""); }}
-                className="self-start rounded-lg border border-white/30 px-3 py-2 text-sm hover:bg-white/10"
+                className="self-center bg-white/5 border border-white/10 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400 transition-all"
               >
-                Clear analysis
+                Clear Results
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-6 md:grid-cols-4">
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Current Price</div>
-                <div className="text-xl font-bold text-primary">
-                  {analyzedPrice != null ? `LKR ${analyzedPrice.toFixed(2)}` : "N/A"}
+            
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: "Current Price", value: analyzedPrice != null ? `LKR ${analyzedPrice.toFixed(2)}` : "N/A", icon: "💎" },
+                { label: "Market Cap", value: analyzedStock.marketCap || "N/A", icon: "🏢" },
+                { label: "Volume", value: analyzedStock.volume != null ? Number(analyzedStock.volume).toLocaleString() : "N/A", icon: "📊" },
+                { 
+                  label: "Price Change", 
+                  value: `${(normalizeNumber(analyzedStock.change) ?? 0) >= 0 ? "+" : ""}${(normalizeNumber(analyzedStock.change) ?? 0).toFixed(2)}%`, 
+                  icon: "📈",
+                  color: (normalizeNumber(analyzedStock.change) ?? 0) >= 0 ? "text-green-400" : "text-red-400"
+                }
+              ].map((stat, i) => (
+                <div key={i} className="bg-slate-900/40 p-6 rounded-2xl border border-white/5 hover:border-blue-500/20 transition-all group">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{stat.label}</span>
+                    <span className="opacity-30 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0">{stat.icon}</span>
+                  </div>
+                  <div className={`text-xl font-black ${stat.color || "text-white"} text-glow tracking-tight`}>
+                    {stat.value}
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Market Cap</div>
-                <div className="text-xl font-bold text-primary">
-                  {analyzedStock.marketCap || "N/A"}
-                </div>
-              </div>
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Volume</div>
-                <div className="text-xl font-bold text-primary">
-                  {analyzedStock.volume != null ? Number(analyzedStock.volume).toLocaleString() : "N/A"}
-                </div>
-              </div>
-              <div className="bg-white rounded-lg p-4 text-slate-900">
-                <div className="text-sm text-gray-600 mb-1">Price Change</div>
-                <div className={`text-xl font-bold ${(normalizeNumber(analyzedStock.change) ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {(normalizeNumber(analyzedStock.change) ?? 0) >= 0 ? "+" : ""}
-                  {(normalizeNumber(analyzedStock.change) ?? 0).toFixed(2)}%
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-bold text-primary border-b-2 border-gray-200 pb-3">
-            Key Financial Ratios
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 no-print">
+          <h3 className="text-2xl font-black text-white flex items-center gap-3">
+            <span className="w-2 h-8 bg-blue-600 rounded-full"></span>
+            Financial Health Ratios
           </h3>
           {analyzedStock && (
-            <span className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-              {analyzedStock.companyName} ({analyzedStock.ticker})
-            </span>
+            <div className="bg-blue-600/10 border border-blue-500/20 px-4 py-2 rounded-xl text-blue-400 text-xs font-black uppercase tracking-widest animate-fadeIn">
+              Showing Data For: {analyzedStock.companyName}
+            </div>
           )}
         </div>
 
         {!analyzedStock && (
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-slate-500 mb-4">
             Enter a CSE ticker above and click &quot;Analyze Stock&quot; to load financial ratios.
           </p>
         )}
 
-        <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 mb-12 md:grid-cols-2 lg:grid-cols-3">
           {financialRatios.map((ratio, index) => {
             const rawValue = analyzedStock?.ratios?.[ratio.key];
             const displayValue = formatRatioValue(rawValue, ratio.format);
             const health = getRatioHealth(ratio, rawValue);
-            const cardClass =
-              health === "good"
-                ? "bg-green-50 border-l-4 border-r-4 border-green-500"
-                : health === "caution"
-                  ? "bg-red-50 border-l-4 border-r-4 border-red-500"
-                  : getRatingClass(ratio.rating);
-
+            
             return (
-              <div key={index} className={`card ${cardClass}`}>
+              <div key={index} className="glass-card p-8 rounded-3xl hover:scale-[1.02] hover:glow-blue transition-all duration-300 animate-slideUp" style={{ animationDelay: `${index * 50}ms` }}>
                 <div className="text-center">
-                  <h4 className="font-semibold text-gray-800 mb-2 text-lg">
+                  <h4 className="font-black text-white mb-6 text-sm uppercase tracking-widest">
                     {ratio.name}
                   </h4>
                   {displayValue ? (
-                    <div className={`text-2xl font-bold mb-2 ${health === "good" ? "text-green-600" : "text-red-600"}`}>
-                      {displayValue}
-                      <span className="ml-2 text-sm">
-                        {health === "good" ? "✓" : "⚠"}
-                      </span>
+                    <div className="flex flex-col items-center mb-6">
+                       <div className={`text-4xl font-black mb-1 text-glow ${health === "good" ? "text-green-400" : "text-rose-500"}`}>
+                        {displayValue}
+                      </div>
+                      <div className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${health === "good" ? "bg-green-500/10 text-green-400" : "bg-rose-500/10 text-rose-500"}`}>
+                        {health === "good" ? "Strong Indicator" : "Needs Review"}
+                      </div>
                     </div>
                   ) : (
-                    <div className="text-gray-400 text-sm mb-2 italic">
-                      {analyzedStock ? "Data unavailable" : "Search a stock above"}
+                    <div className="bg-slate-900/50 py-8 rounded-2xl border border-dashed border-slate-800 text-slate-600 text-[10px] font-black uppercase tracking-widest mb-6">
+                      {analyzedStock ? "Data Unavailable" : "Pending Analysis"}
                     </div>
                   )}
-                  <div className="text-xl mb-2">{renderStars(ratio.rating)}</div>
-                  <p className="text-sm text-gray-700 font-medium">{ratio.meaning}</p>
-                  <p className="text-xs text-gray-400 mt-1">{ratio.benchmark}</p>
+                  <div className="mb-6">{renderStars(ratio.rating)}</div>
+                  <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p className="text-xs text-slate-300 font-medium leading-relaxed mb-3">{ratio.meaning}</p>
+                    <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">{ratio.benchmark}</p>
+                  </div>
                 </div>
               </div>
             );

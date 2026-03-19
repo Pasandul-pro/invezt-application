@@ -79,7 +79,7 @@ const Login = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-primary-light flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center p-4">
       {/* Market Highlights Ticker */}
       <div style={tickerStyles.wrapper}>
         <div style={tickerStyles.track}>
@@ -98,21 +98,21 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
+      <div className="bg-[#1e293b] border border-slate-700/50 rounded-2xl shadow-2xl p-10 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary">Invezt</h1>
-          <p className="text-gray-600 mt-2">Investing Made Simple</p>
+          <h1 className="text-3xl font-bold text-blue-400">Invezt</h1>
+          <p className="text-slate-400 mt-2">Investing Made Simple</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded mb-6 text-red-700 text-sm">
+          <div className="bg-red-900/20 border-l-4 border-red-500 p-3 rounded mb-6 text-red-300 text-sm">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
             <input
               type="email"
               value={email}
@@ -124,7 +124,7 @@ const Login = () => {
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
             <input
               type="password"
               value={password}
@@ -135,24 +135,24 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-full mb-3" disabled={loading}>
+          <button type="submit" className="btn btn-primary bg-blue-600 hover:bg-blue-500 w-full mb-3" disabled={loading}>
             {loading ? 'Logging in...' : 'Log In'}
           </button>
 
           <Link
             to="/register"
-            className="btn bg-transparent border-2 border-primary text-primary hover:bg-primary hover:text-white w-full block text-center"
+            className="btn bg-transparent border-2 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white w-full block text-center"
           >
             Create Account
           </Link>
 
           <div className="text-center mt-6">
-            <a href="#" className="text-primary hover:underline text-sm">Forgot password?</a>
+            <a href="#" className="text-blue-400 hover:underline text-sm">Forgot password?</a>
           </div>
         </form>
 
         <div className="text-center mt-8">
-          <Link to="/" className="text-gray-600 hover:text-primary transition-colors">
+          <Link to="/" className="text-slate-400 hover:text-blue-400 transition-colors">
             ← Back to Home
           </Link>
         </div>

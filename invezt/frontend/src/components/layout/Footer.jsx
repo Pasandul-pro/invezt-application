@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
     return (
-        <footer className="bg-slate-900/95 border-t border-slate-800/50 backdrop-blur-md text-slate-400 py-10 mt-auto">
+        <footer className="bg-[#0f172a]/95 border-t border-slate-800 backdrop-blur-md text-slate-400 py-10 mt-auto">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                     {/* Brand Section */}

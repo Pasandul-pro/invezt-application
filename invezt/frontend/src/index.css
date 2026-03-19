@@ -40,104 +40,84 @@
 
 @layer components {
   .btn {
-    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 
            hover:shadow-lg active:scale-95 focus:outline-none focus:ring-2 
-           focus:ring-offset-2;
+           focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-primary {
     @apply bg-blue-600 text-white hover:bg-blue-500 
-           focus:ring-blue-600;
+           hover:shadow-blue-500/25 focus:ring-blue-600;
   }
   
   .btn-outline {
-    @apply border-2 border-white text-white hover:bg-white/10 
-           focus:ring-white;
+    @apply border-2 border-white/20 text-white hover:bg-white/10 
+           hover:border-white/40 focus:ring-white;
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-md p-6 text-slate-900 transition-all 
-           duration-300 hover:shadow-xl hover:-translate-y-1;
+    @apply bg-[#1e293b]/80 backdrop-blur-md rounded-2xl shadow-xl p-6 text-slate-100 
+           border border-white/10 transition-all duration-500 
+           hover:border-blue-500/30 hover:shadow-blue-500/10 hover:-translate-y-1;
   }
   
   .input {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900
-           placeholder:text-gray-400
-           focus:outline-none focus:ring-2 focus:ring-blue-600 
-           focus:border-transparent transition-all;
+    @apply w-full px-4 py-3 bg-[#0f172a] border border-slate-700/50 rounded-xl text-slate-100
+           placeholder:text-slate-500 transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-blue-500/50 
+           focus:border-blue-500/50;
   }
 }
 
 @layer utilities {
   .glass {
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10;
   }
 
   .glass-card {
-    background: rgba(30, 41, 59, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    @apply bg-slate-800/40 backdrop-blur-lg border border-white/10 shadow-2xl;
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #3b82f6, #06b6d4, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400;
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600;
   }
 
   .glow-blue {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15), 0 0 60px rgba(59, 130, 246, 0.05);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 0 40px rgba(59, 130, 246, 0.1);
   }
 
   .glow-border {
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    @apply border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.2)];
+  }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
   }
 
   .animate-fadeIn {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
   .animate-slideUp {
-    animation: slideUp 0.5s ease-out forwards;
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
-  .animate-slideDown {
-    animation: slideDown 0.3s ease-out forwards;
-  }
-
-  .animate-shake {
-    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
-  }
-
-  .animate-pulse-glow {
-    animation: pulseGlow 2s ease-in-out infinite;
-  }
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
 
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(16px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
   }
 
   @keyframes pulseGlow {
@@ -145,4 +125,7 @@
     50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
   }
 
-}
+  .animate-pulse-glow {
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+}

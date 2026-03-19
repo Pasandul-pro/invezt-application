@@ -229,61 +229,59 @@ const Dashboard = () => {
   const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
   return (
-    <div style={styles.pageWrapper} className="page-wrapper bg-white min-h-screen text-slate-900">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100 animate-fadeIn">
       <Header />
-      <style>
-        {`@media print { .no-print { display: none !important; } body, .page-wrapper { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background-color: #ffffff !important; } .print-card { page-break-inside: avoid; break-inside: avoid; margin-bottom: 20px !important; } }`}
-      </style>
-
-      <div style={styles.container}>
-        <div style={styles.hero}>
-          <h1 style={{ fontSize: '36px', marginBottom: '15px' }}>Welcome to Your Dashboard</h1>
-          <p style={{ opacity: 0.9, fontSize: '18px' }}>Track, analyze, and manage your investments in Sri Lankan stocks</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="premium-gradient p-12 rounded-3xl text-center mb-12 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <h1 className="text-5xl font-extrabold mb-4 tracking-tight drop-shadow-md">Welcome to Your Dashboard</h1>
+          <p className="text-xl text-blue-100/90 font-medium">Track, analyze, and manage your investments in Sri Lankan stocks</p>
         </div>
 
-        <h2 style={{ color: '#1e293b', marginBottom: '20px' }} className="no-print">Quick Actions</h2>
-        <div style={styles.quickActionsGrid} className="no-print">
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Analyze Stock</h3>
-            <p style={styles.actionCardText}>Search and analyze any Sri Lankan stock</p>
-            <button onClick={() => navigate('/analyzer')} style={styles.actionBtn}>Go</button>
-          </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Compare Companies</h3>
-            <p style={styles.actionCardText}>Compare up to 3 Sri Lankan companies</p>
-            <button onClick={() => navigate('/compare')} style={styles.actionBtn}>Go</button>
-          </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Create Portfolio</h3>
-            <p style={styles.actionCardText}>Build and track your portfolio</p>
-            <button onClick={() => navigate('/portfolio')} style={styles.actionBtn}>Go</button>
-          </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Valuation Models</h3>
-            <p style={styles.actionCardText}>Learn about CAPM, DCF, and other models</p>
-            <button onClick={() => navigate('/valuation-models')} style={styles.actionBtn}>Go</button>
-          </div>
-          <div style={styles.actionCard}>
-            <h3 style={styles.actionCardTitle}>Company Reports</h3>
-            <p style={styles.actionCardText}>Valuate your company Through Your Report</p>
-            <button onClick={() => {
-              window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            }} style={styles.actionBtn}>Go</button>
-          </div>
+        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2 no-print">
+          <span className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm">🚀</span>
+          Quick Actions
+        </h2>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12 no-print">
+          {[
+            { title: 'Analyze Stock', text: 'Search and analyze any Sri Lankan stock', path: '/analyzer', icon: '🔍' },
+            { title: 'Compare Companies', text: 'Compare up to 3 Sri Lankan companies', path: '/compare', icon: '⚖️' },
+            { title: 'Create Portfolio', text: 'Build and track your portfolio', path: '/portfolio', icon: '💼' },
+            { title: 'Valuation Models', text: 'Learn about CAPM, DCF, and other models', path: '/valuation-models', icon: '📐' },
+            { title: 'Company Reports', text: 'Valuate your company Through Your Report', action: () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), icon: '📄' }
+          ].map((action, i) => (
+            <div key={i} className="glass-card p-6 rounded-2xl flex flex-col justify-between hover:glow-blue hover:-translate-y-2 transition-all duration-300 animate-slideUp" style={{ animationDelay: `${i * 100}ms` }}>
+              <div>
+                <div className="text-3xl mb-4">{action.icon}</div>
+                <h3 className="text-lg font-bold text-blue-400 mb-2">{action.title}</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-6">{action.text}</p>
+              </div>
+              <button 
+                onClick={action.path ? () => navigate(action.path) : action.action} 
+                className="btn btn-primary w-full py-2 text-sm"
+              >
+                Go
+              </button>
+            </div>
+          ))}
         </div>
 
-        <h2 style={{ color: '#1e293b', marginTop: '30px', marginBottom: '20px' }}>Market Highlights</h2>
-        <div style={styles.marketHighlights}>
+        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <span className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center text-sm">📈</span>
+          Market Highlights
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {['ASPI', 'S&P SL20', 'LKR/USD'].map((item, idx) => {
-            // snapshot response: { aspi: {value, isPositive}, snp: {value, isPositive} }
             const indexData = idx === 0 ? marketHighlights?.aspi : idx === 1 ? marketHighlights?.snp : null;
             const isPositive = idx === 2 ? false : (indexData?.isPositive ?? true);
-            const valueColor = idx === 2 ? '#ef4444' : (isPositive ? '#22c55e' : '#ef4444');
+            const valueColor = idx === 2 ? 'text-red-400' : (isPositive ? 'text-green-400' : 'text-red-400');
 
             return (
-              <div key={item} style={styles.highlightCard}>
-                <h3 style={styles.highlightHeader}>{item}</h3>
-                <p style={{ fontSize: '24px', fontWeight: 'bold', color: valueColor }}>
+              <div key={item} className="glass-card p-6 rounded-2xl text-center hover:glow-border transition-all duration-300 animate-fadeIn">
+                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">{item}</h3>
+                <p className={`text-3xl font-black ${valueColor} text-glow`}>
                   {idx === 2 ? liveUsd : (marketHighlights ? (idx === 0 ? marketHighlights.aspi?.value ?? '...' : marketHighlights.snp?.value ?? '...') : '...')}
                 </p>
               </div>
@@ -291,166 +289,162 @@ const Dashboard = () => {
           })}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '30px' }} className="print-card">
-          <div style={styles.chartCard}>
-            <h3 style={{ color: '#1e3a8a', marginBottom: '20px' }}>📊 Price vs. Intrinsic Value</h3>
-            <div style={{ width: '100%', height: 300 }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 print-card">
+          <div className="card h-full">
+            <h3 className="text-xl font-bold text-blue-400 mb-6 flex items-center gap-2">
+              <span>📊</span> Price vs. Intrinsic Value
+            </h3>
+            <div className="w-full h-[300px]">
               <ResponsiveContainer>
                 <BarChart data={chartData}>
-                  <XAxis dataKey="name" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" />
-                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
-                  <Legend />
-                  <Bar dataKey="GrahamValue" name="Graham Value" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="MarketPrice" name="Market Price" fill="#38bdf8" radius={[4, 4, 0, 0]} />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}
+                    itemStyle={{ fontSize: '12px' }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                  <Bar dataKey="GrahamValue" name="Graham Value" fill="#10b981" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="MarketPrice" name="Market Price" fill="#3b82f6" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-          <div style={styles.chartCard}>
-            <h3 style={{ color: '#1e3a8a', marginBottom: '20px' }}>🥧 Portfolio Sector Exposure</h3>
-            <div style={{ width: '100%', height: 300 }}>
+          
+          <div className="card h-full">
+            <h3 className="text-xl font-bold text-blue-400 mb-6 flex items-center gap-2">
+              <span>🥧</span> Portfolio Sector Exposure
+            </h3>
+            <div className="w-full h-[300px] flex items-center justify-center">
               {sectorData.length > 0 ? (
                 <ResponsiveContainer>
                   <PieChart>
-                    <Pie data={sectorData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                      {sectorData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                    <Pie 
+                      data={sectorData} 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius={70} 
+                      outerRadius={100} 
+                      paddingAngle={8} 
+                      dataKey="value" 
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {sectorData.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} stroke="none" />)}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>No sector data available yet.</div>
+                <div className="text-slate-500 font-medium">No sector data available yet.</div>
               )}
             </div>
           </div>
         </div>
 
         {/* --- Company Report Valuation Section --- */}
-        <h2 style={{ color: '#1e293b', marginTop: '40px', marginBottom: '20px' }} className="no-print">Company Report Valuation</h2>
-        <div style={styles.reportCard} className="no-print">
-          <p style={{ color: '#94a3b8', marginBottom: '20px' }}>Upload a company's Annual Report or Financial Statement (PDF) to get an instant AI-powered valuation and investment summary.</p>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-6 flex items-center gap-2 no-print">
+          <span className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center text-sm">🤖</span>
+          AI Company Report Valuation
+        </h2>
+        
+        <div className="card no-print overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full"></div>
+          <p className="text-slate-400 mb-8 relative z-10">Upload a company's Annual Report or Financial Statement (PDF) to get an instant AI-powered valuation and investment summary.</p>
           
-          <div style={styles.uploadContainer}>
+          <div className="bg-slate-900/40 p-8 rounded-2xl border border-white/5 relative z-10">
             <input 
               type="file" 
               accept=".pdf" 
               onChange={handleFileChange} 
-              style={{ color: '#0f172a', marginBottom: '15px', padding: '10px', width: '100%', border: '1px dashed #cbd5e1', borderRadius: '8px', backgroundColor: '#ffffff' }}
+              className="block w-full text-sm text-slate-400
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-600 file:text-white
+                hover:file:bg-blue-500 transition-all mb-6 cursor-pointer"
             />
             <button 
               onClick={handleAnalyzeReport} 
               disabled={!reportFile || isAnalyzing}
-              style={{ ...styles.actionBtn, opacity: (!reportFile || isAnalyzing) ? 0.7 : 1, width: 'auto' }}
+              className={`btn btn-primary w-full md:w-auto ${isAnalyzing ? 'animate-pulse' : ''}`}
             >
               {isAnalyzing ? 'Analyzing Report... (This may take a minute)' : 'Generate AI Valuation'}
             </button>
           </div>
 
           {analysisError && (
-            <div style={{ padding: '15px', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '8px', marginTop: '20px', fontWeight: 'bold' }}>
+            <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl font-medium animate-shake">
               ⚠️ {analysisError}
             </div>
           )}
 
           {valuationResult && (
-            <div style={styles.analysisResult}>
-              <div style={styles.resultHeader}>
-                <h3 style={{ margin: 0, color: '#1e3a8a' }}>AI Analysis Results</h3>
-                <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '14px', fontWeight: 'bold', backgroundColor: valuationResult.recommendation?.signal?.includes('Buy') ? '#dcfce7' : valuationResult.recommendation?.signal?.includes('Sell') ? '#fee2e2' : '#fef3c7', color: valuationResult.recommendation?.signal?.includes('Buy') ? '#15803d' : valuationResult.recommendation?.signal?.includes('Sell') ? '#dc2626' : '#b45309' }}>
+            <div className="mt-12 glass-card p-8 rounded-2xl border-blue-500/20 animate-fadeIn">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 pb-6 border-b border-white/5">
+                <h3 className="text-2xl font-bold text-blue-400">AI Analysis Results</h3>
+                <span className={`px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest ${
+                  valuationResult.recommendation?.signal?.includes('Buy') ? 'bg-green-500/20 text-green-400' : 
+                  valuationResult.recommendation?.signal?.includes('Sell') ? 'bg-red-500/20 text-red-400' : 
+                  'bg-yellow-500/20 text-yellow-400'
+                }`}>
                   {valuationResult.recommendation?.signal || 'Unknown'}
                 </span>
               </div>
               
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ color: '#2563eb', marginBottom: '10px' }}>Financial Summary</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-                  <div style={styles.metricBox}>
-                    <span style={styles.metricLabel}>Revenue</span>
-                    <span style={styles.metricValue}>{valuationResult.financialSummary?.revenue || 'N/A'}</span>
-                  </div>
-                  <div style={styles.metricBox}>
-                    <span style={styles.metricLabel}>Net Income</span>
-                    <span style={styles.metricValue}>{valuationResult.financialSummary?.netIncome || 'N/A'}</span>
-                  </div>
-                  <div style={styles.metricBox}>
-                    <span style={styles.metricLabel}>EPS</span>
-                    <span style={styles.metricValue}>{valuationResult.financialSummary?.eps || 'N/A'}</span>
-                  </div>
-                  <div style={styles.metricBox}>
-                    <span style={styles.metricLabel}>Est. Intrinsic Value</span>
-                    <span style={{ ...styles.metricValue, color: '#4ade80' }}>{valuationResult.valuation?.estimatedIntrinsicValue || 'N/A'}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                  <h4 className="text-sm font-bold text-blue-500 uppercase tracking-widest mb-4">Financial Summary</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      { label: 'Revenue', value: valuationResult.financialSummary?.revenue },
+                      { label: 'Net Income', value: valuationResult.financialSummary?.netIncome },
+                      { label: 'EPS', value: valuationResult.financialSummary?.eps },
+                      { label: 'Intrinsic Value', value: valuationResult.valuation?.estimatedIntrinsicValue, highlight: true }
+                    ].map((metric, mIdx) => (
+                      <div key={mIdx} className="bg-slate-900/60 p-4 rounded-xl border border-white/5">
+                        <span className="text-[10px] text-slate-500 uppercase font-black block mb-1">{metric.label}</span>
+                        <span className={`text-lg font-bold ${metric.highlight ? 'text-green-400 text-glow' : 'text-slate-200'}`}>
+                          {metric.value || 'N/A'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div style={{ backgroundColor: '#ffffff', padding: '15px', borderRadius: '8px', fontSize: '14px', color: '#475569', border: '1px solid #e2e8f0' }}>
-                  <strong>Valuation Methodology:</strong> {valuationResult.valuation?.methodologyUsed || 'Not provided'}
+
+                <div className="bg-white/5 p-6 rounded-2xl border border-white/5 self-center">
+                  <div className="text-sm font-bold text-blue-500 uppercase tracking-widest mb-2">Methodology</div>
+                  <p className="text-sm text-slate-400 italic">"{valuationResult.valuation?.methodologyUsed || 'Not provided'}"</p>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
-                <h4 style={{ color: '#2563eb', marginBottom: '10px' }}>Key Takeaways</h4>
-                <ul style={{ color: '#475569', paddingLeft: '20px', margin: 0 }}>
+              <div className="mb-8">
+                <h4 className="text-sm font-bold text-blue-500 uppercase tracking-widest mb-4">Key Takeaways</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {valuationResult.financialSummary?.keyTakeaways?.map((takeaway, i) => (
-                    <li key={i} style={{ marginBottom: '8px' }}>{takeaway}</li>
+                    <div key={i} className="flex items-start gap-3 text-slate-300 text-sm">
+                      <span className="text-blue-500 mt-1">✦</span>
+                      {takeaway}
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
 
-              <div>
-                <h4 style={{ color: '#2563eb', marginBottom: '10px' }}>Investment Justification</h4>
-                <p style={{ color: '#0f172a', lineHeight: '1.6', margin: 0 }}>{valuationResult.recommendation?.justification}</p>
+              <div className="p-6 bg-blue-600/5 rounded-2xl border border-blue-500/10">
+                <h4 className="text-sm font-bold text-blue-500 uppercase tracking-widest mb-3">Investment Justification</h4>
+                <p className="text-slate-200 leading-relaxed text-sm">{valuationResult.recommendation?.justification}</p>
               </div>
             </div>
           )}
         </div>
 
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '15px' }} className="no-print">
-          <button onClick={() => window.print()} style={styles.pdfBtn}>📄 Download PDF Report</button>
+        <div className="mt-8 flex justify-end no-print">
+          <button onClick={() => window.print()} className="btn bg-rose-600 text-white hover:bg-rose-500 font-bold shadow-lg hover:shadow-rose-500/20">
+            📄 Download PDF Report
+          </button>
         </div>
       </div>
     </div>
   );
-};
-
-const styles = {
-  pageWrapper: { fontFamily: 'Inter, sans-serif' },
-  container: { maxWidth: '1200px', margin: '0 auto', padding: '20px' },
-  hero: { background: 'linear-gradient(135deg, #1e3a8a, #3b82f6)', padding: '40px', borderRadius: '10px', textAlign: 'center', marginBottom: '30px', color: 'white' },
-  quickActionsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', margin: '20px 0 40px 0' },
-  actionCard: { backgroundColor: '#ffffff', padding: '25px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' },
-  actionCardTitle: { color: '#1e3a8a', marginBottom: '10px', fontSize: '18px', fontWeight: 'bold' },
-  actionCardText: { color: '#64748b', fontSize: '14px', marginBottom: '20px', flex: 1 },
-  actionBtn: { padding: '10px 20px', backgroundColor: '#1e3a8a', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'inline-block', fontWeight: 'bold', width: '100%', transition: 'background-color 0.2s' },
-  actionBtnSecondary: { padding: '8px 16px', backgroundColor: '#f1f5f9', color: '#1e3a8a', border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', marginTop: '10px', width: 'fit-content' },
-  newsCard: { backgroundColor: '#ffffff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', marginTop: '10px' },
-  newsTitle: { color: '#1e3a8a', marginBottom: '10px', fontSize: '18px', fontWeight: 'bold' },
-  newsText: { color: '#64748b', marginBottom: '15px', fontSize: '14px' },
-  marketHighlights: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '40px' },
-  highlightCard: { backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
-  highlightHeader: { color: '#64748b', fontSize: '14px', marginBottom: '10px', fontWeight: '500' },
-  chartCard: { backgroundColor: '#ffffff', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', height: '100%' },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' },
-  card: { backgroundColor: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
-  cardHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: '10px' },
-  ticker: { color: '#1e3a8a', fontSize: '20px', margin: 0, fontWeight: 'bold' },
-  companyName: { color: '#64748b', fontSize: '14px', margin: '0 0 15px 0' },
-  priceContainer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' },
-  price: { color: '#0f172a', fontSize: '22px', fontWeight: 'bold' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  tableRow: { borderBottom: '1px solid #e2e8f0' },
-  tableLabel: { padding: '10px 0', color: '#64748b', fontSize: '14px' },
-  tableValue: { color: '#0f172a', textAlign: 'right', fontWeight: 'bold', fontSize: '14px' },
-  iconBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' },
-  filterBtn: { padding: '8px 16px', color: 'white', border: '1px solid #334155', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' },
-  pdfBtn: { padding: '10px 20px', backgroundColor: '#f43f5e', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' },
-  input: { padding: '12px', borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: 'white' },
-  reportCard: { backgroundColor: '#ffffff', padding: '30px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', marginBottom: '30px' },
-  uploadContainer: { display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' },
-  analysisResult: { marginTop: '30px', padding: '25px', backgroundColor: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' },
-  resultHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #e2e8f0' },
-  metricBox: { backgroundColor: '#ffffff', padding: '15px', borderRadius: '8px', display: 'flex', flexDirection: 'column', border: '1px solid #e2e8f0' },
-  metricLabel: { color: '#64748b', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '5px' },
-  metricValue: { color: '#1e3a8a', fontSize: '18px', fontWeight: 'bold' }
 };
 
 export default Dashboard;

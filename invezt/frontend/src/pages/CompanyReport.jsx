@@ -38,21 +38,21 @@ const CompanyReport = () => {
   const notOkCount = financialRatiosAnalysis.length - okCount;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0f172a] text-slate-100">
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-primary to-primary-light text-white rounded-2xl p-12 text-center mb-8">
+        <div className="bg-gradient-to-r from-blue-900/40 to-blue-600/20 border border-blue-500/30 text-white rounded-2xl p-12 text-center mb-8 backdrop-blur-sm">
           <h1 className="text-4xl font-bold mb-4">Financial Report Analysis</h1>
-          <p className="text-lg opacity-90">Upload financial documents for automated analysis and valuation insights</p>
+          <p className="text-lg opacity-90 text-blue-100">Upload financial documents for automated analysis and valuation insights</p>
         </div>
 
         <div className="card mb-8">
-          <h2 className="text-2xl font-bold text-primary mb-6">Upload Financial Report</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Upload Financial Report</h2>
           
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-primary transition-colors cursor-pointer bg-gray-50">
-            <Upload className="w-16 h-16 text-primary mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">Drag & drop your financial report here or click to browse</p>
+          <div className="border-2 border-dashed border-slate-700/50 rounded-xl p-12 text-center hover:border-blue-500 transition-colors cursor-pointer bg-slate-900/50">
+            <Upload className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+            <p className="text-slate-400 mb-4">Drag & drop your financial report here or click to browse</p>
             <input
               type="file"
               id="fileInput"
@@ -62,26 +62,26 @@ const CompanyReport = () => {
             />
             <label
               htmlFor="fileInput"
-              className="btn btn-primary cursor-pointer inline-block"
+              className="btn btn-primary bg-blue-600 hover:bg-blue-500 cursor-pointer inline-block"
             >
               Choose File
             </label>
             {selectedFile && (
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                <strong className="text-primary">Selected file:</strong>{' '}
-                <span className="text-gray-700">{selectedFile.name}</span>
+              <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <strong className="text-blue-400">Selected file:</strong>{' '}
+                <span className="text-slate-300">{selectedFile.name}</span>
               </div>
             )}
           </div>
           
-          <button onClick={handleAnalyze} className="btn btn-primary w-full mt-6">
+          <button onClick={handleAnalyze} className="btn btn-primary bg-blue-600 hover:bg-blue-500 w-full mt-6">
             Analyze Report
           </button>
         </div>
 
         {showAnalysis && (
           <div className="card">
-            <h2 className="text-2xl font-bold text-primary mb-6 border-b-2 border-gray-200 pb-3">
+            <h2 className="text-2xl font-bold text-white mb-6 border-b-2 border-slate-800 pb-3">
               Financial Ratio Analysis
             </h2>
             
@@ -89,34 +89,34 @@ const CompanyReport = () => {
               {financialRatiosAnalysis.map((ratio, index) => (
                 <div
                   key={index}
-                  className={`p-6 rounded-lg shadow-md ${
+                  className={`p-6 rounded-lg shadow-md transition-all border ${
                     ratio.status === 'ok'
-                      ? 'bg-green-50 border-l-4 border-green-500'
-                      : 'bg-red-50 border-l-4 border-red-500'
+                      ? 'bg-green-900/10 border-green-500/30'
+                      : 'bg-red-900/10 border-red-500/30'
                   }`}
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-primary">{ratio.name}</h3>
+                    <h3 className="font-semibold text-white">{ratio.name}</h3>
                     <span
                       className={`text-xs font-semibold px-3 py-1 rounded-full ${
                         ratio.status === 'ok'
-                          ? 'bg-green-200 text-green-800'
-                          : 'bg-red-200 text-red-800'
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-red-500/20 text-red-400'
                       }`}
                     >
                       {ratio.status === 'ok' ? 'OK' : 'Needs Attention'}
                     </span>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-2">{ratio.value}</div>
-                  <p className="text-sm text-gray-600 mb-2">{ratio.description}</p>
-                  <p className="text-sm italic text-gray-700">{ratio.interpretation}</p>
+                  <div className="text-2xl font-bold text-blue-400 mb-2">{ratio.value}</div>
+                  <p className="text-sm text-slate-400 mb-2">{ratio.description}</p>
+                  <p className="text-sm italic text-slate-300">{ratio.interpretation}</p>
                 </div>
               ))}
             </div>
 
-            <div className="bg-blue-50 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-primary mb-4">Summary</h3>
-              <p className="text-gray-700 leading-relaxed">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+              <h3 className="text-xl font-bold text-blue-400 mb-4">Summary</h3>
+              <p className="text-slate-300 leading-relaxed">
                 The financial analysis shows {okCount} out of {financialRatiosAnalysis.length} key ratios are in good standing. 
                 The company demonstrates strong profitability with healthy ROE and profit margins. 
                 {notOkCount > 0 && (
