@@ -226,7 +226,8 @@ const Dashboard = () => {
         return acc;
       }, {});
   const sectorData = Object.keys(sectorDataRaw).map(sector => ({ name: sector, value: sectorDataRaw[sector] }));
-  const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+                  <Bar dataKey="MarketPrice" name="Market Price" fill="#387be6" radius={[6, 6, 0, 0]} />
+  const PIE_COLORS = ['#2d76ea', '#10b956', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-100 animate-fadeIn">
@@ -304,8 +305,8 @@ const Dashboard = () => {
                     itemStyle={{ fontSize: '12px' }}
                   />
                   <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                  <Bar dataKey="GrahamValue" name="Graham Value" fill="#10b981" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="MarketPrice" name="Market Price" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="GrahamValue" name="Graham Value" fill="#10b956" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="MarketPrice" name="Market Price" fill="#2d76ea" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
