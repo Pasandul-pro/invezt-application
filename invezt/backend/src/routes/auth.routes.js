@@ -1,3 +1,4 @@
+// Auth routes: register, login, and protected profile endpoint
 import express from 'express';
 import { createRequire } from 'module';
 import { body, validationResult } from 'express-validator';
@@ -76,5 +77,7 @@ router.get('/me', protect, (req, res) => {
     role: req.user.role
   });
 });
+
+
 
 export default router;
